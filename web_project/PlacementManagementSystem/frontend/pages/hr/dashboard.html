@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR Recruiter Portal | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">HR Portal</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="../admin/dashboard.html">Admin</a>
+      <a href="../student/dashboard.html">Student</a>
+      <a href="dashboard.html" class="active">HR Portal</a>
+      <a href="../interviewer/dashboard.html">Interviewer</a>
+      <a href="../../index.html#engines-section" class="btn btn-accent" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">Engines Lab</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Corporate Recruiter & HR Desk</h1>
+        <p class="page-subtitle">Manage company drives, screen applicants, review resumes, and shortlist candidates using MySQL Stored Procedures.</p>
+      </div>
+      <div>
+        <span class="badge badge-accent" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;">Logged in: Google India HR Panel</span>
+      </div>
+    </div>
+
+    <!-- Company Profile -->
+    <div class="card" style="margin-bottom: 1.5rem; background: #fdfbf7; border-left: 4px solid #f59e0b;">
+      <h2 style="font-size: 1.25rem; color: #b45309;">🏢 Google India (Information Technology)</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+        Recruiting Role: <strong>Software Engineer - Level 3</strong> | Compensation: <strong>32.50 LPA</strong> | Minimum Cutoff: <strong>8.00 CGPA</strong>
+      </p>
+    </div>
+
+    <!-- Applicant Screening Table -->
+    <div class="card">
+      <div class="card-title">
+        <span>Student Applicants for Google Campus Drive 2026</span>
+        <button type="button" class="btn btn-outline" style="font-size: 0.8rem;" onclick="loadHRData()">🔄 Refresh Applicants</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table" style="font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th>App #</th>
+              <th>Candidate Name</th>
+              <th>USN</th>
+              <th>Department</th>
+              <th>CGPA</th>
+              <th>Resume</th>
+              <th>Current Stage</th>
+              <th>HR Approval Action</th>
+            </tr>
+          </thead>
+          <tbody id="hr-apps-tbody">
+            <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading applicants...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-callout" style="margin-top: 1.5rem;">
+        <strong>Integration:</strong>
+        When you click "Shortlist" or "Reject", the action executes MySQL Stored Procedure <code>sp_update_application_status</code>. This automatically fires database trigger <code>trg_application_status_notification</code>, delivering an instant alert to the student's dashboard.
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    async function loadHRData() {
+      try {
+        const res = await fetch('/api/placement/applications');
+        const json = await res.json();
+        const tbody = document.getElementById('hr-apps-tbody');
+        tbody.innerHTML = '';
+
+        // Student metadata lookup
+        const candidates = {
+          1: { name: 'Aarav Sharma', usn: '1MS21CS001', dept: 'Computer Science', cgpa: 8.95, resume: 'https://drive.google.com/resume_aarav.pdf' },
+          2: { name: 'Diya Patel', usn: '1MS21CS042', dept: 'Information Science', cgpa: 9.15, resume: 'https://drive.google.com/resume_diya.pdf' },
+          3: { name: 'Rohan Verma', usn: '1MS21EC015', dept: 'Electronics', cgpa: 7.80, resume: 'https://drive.google.com/resume_rohan.pdf' }
+        };
+
+        json.applications.forEach(app => {
+          const cand = candidates[app.student_id] || { name: 'Candidate ' + app.student_id, usn: 'USN?', dept: 'Engineering', cgpa: 8.0, resume: '#' };
+          let badgeClass = 'badge-info';
+          if (app.status === 'shortlisted') badgeClass = 'badge-accent';
+          if (app.status === 'selected') badgeClass = 'badge-success';
+          if (app.status === 'rejected') badgeClass = 'badge-danger';
+
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>#APP-00${app.id}</strong></td>
+              <td><strong>${cand.name}</strong></td>
+              <td><code>${cand.usn}</code></td>
+              <td>${cand.dept}</td>
+              <td><strong>${cand.cgpa}</strong></td>
+              <td><a href="${cand.resume}" target="_blank" style="color: var(--accent); font-weight: 600;">View PDF</a></td>
+              <td><span class="badge ${badgeClass}">${app.status}</span></td>
+              <td>
+                <div style="display: flex; gap: 0.35rem;">
+                  <button type="button" class="btn btn-success" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="updateStatus(${app.id}, 'shortlisted')">Shortlist</button>
+                  <button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="updateStatus(${app.id}, 'rejected')">Reject</button>
+                  <button type="button" class="btn btn-primary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="updateStatus(${app.id}, 'selected')">Select</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+
+      } catch (err) {
+        console.warn('Error loading HR data:', err);
+      }
+    }
+
+    async function updateStatus(applicationId, newStatus) {
+      try {
+        const res = await fetch('/api/dbms/execute-procedure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ applicationId, newStatus, remarks: `Status updated by Google HR Panel to ${newStatus}` })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+        alert(`Success: ${json.storedProcedure.message}\nTrigger Alert: ${json.triggerGeneratedNotification ? json.triggerGeneratedNotification.title : 'Notification sent'}`);
+        loadHRData();
+      } catch (err) {
+        alert('Action error: ' + err.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadHRData);
+  </script>
+</body>
+</html>

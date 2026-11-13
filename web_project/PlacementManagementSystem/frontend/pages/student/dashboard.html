@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">Student Portal</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="../admin/dashboard.html">Admin</a>
+      <a href="dashboard.html" class="active">Student Portal</a>
+      <a href="../hr/dashboard.html">HR</a>
+      <a href="../interviewer/dashboard.html">Interviewer</a>
+      <a href="../../index.html#engines-section" class="btn btn-accent" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">Engines Lab</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Candidate Placement Portal</h1>
+        <p class="page-subtitle">Track eligible drives, submit applications, view interview schedules, and monitor approval notifications.</p>
+      </div>
+      <div>
+        <span class="badge badge-success" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;">Profile Status: Eligible (CGPA: 8.95)</span>
+      </div>
+    </div>
+
+    <!-- Student Profile Card -->
+    <div class="card" style="background: linear-gradient(to right, #ffffff, #f0fdf4); border-left: 4px solid var(--success); margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h2 style="font-size: 1.3rem; color: var(--primary);">👨‍🎓 Aarav Sharma</h2>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0.2rem 0;">
+            USN: <strong>1MS21CS001</strong> | Department: <strong>Computer Science & Engineering</strong> | Batch: <strong>2026</strong>
+          </p>
+          <div style="font-size: 0.85rem; color: #15803d; font-weight: 600;">
+            Cumulative GPA: 8.95 / 10.00 • Cleared All Cutoff Criteria
+          </div>
+        </div>
+        <div>
+          <a href="https://drive.google.com/resume_aarav.pdf" target="_blank" class="btn btn-outline" style="font-size: 0.85rem;">
+            📄 View Verified Resume
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Active Placement Drives -->
+      <div class="card">
+        <div class="card-title">Available Placement Drives</div>
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Company / Drive</th>
+                <th>Role</th>
+                <th>Package (CTC)</th>
+                <th>Cutoff</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="student-drives-tbody">
+              <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading drives...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Applications Status -->
+      <div class="card">
+        <div class="card-title">My Application Progress</div>
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>App #</th>
+                <th>Drive ID</th>
+                <th>Applied Date</th>
+                <th>Current Status</th>
+              </tr>
+            </thead>
+            <tbody id="student-apps-tbody">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading applications...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- My Interview Timetable & Notifications Grid -->
+    <div class="grid-2">
+      <!-- Interview Schedule -->
+      <div class="card">
+        <div class="card-title">My Confirmed Interview Venues</div>
+        <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 1rem; border-radius: 6px; margin-bottom: 0.75rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: #1e40af; font-size: 0.95rem;">Google Campus Drive 2026 - Technical Interview</strong>
+            <span class="badge badge-success">Scheduled</span>
+          </div>
+          <div style="font-size: 0.85rem; color: #1e3a8a; margin-top: 0.5rem;">
+            📍 Venue: <strong>Room-101 (Placement Block, Floor 1)</strong><br>
+            👨‍🏫 Panel: <strong>Dr. Ramesh Kumar (EMP-CS-01)</strong><br>
+            ⏰ Window: <strong>2026-11-20 (10:00 AM – 11:00 AM)</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Real-time Notifications -->
+      <div class="card">
+        <div class="card-title">
+          <span>Placement Notifications</span>
+          <span class="badge badge-accent" id="notif-count">2 New</span>
+        </div>
+        <div id="notifications-list" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 240px; overflow-y: auto;">
+          <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading notifications...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    async function loadStudentData() {
+      try {
+        const [drivesRes, appsRes, notifsRes] = await Promise.all([
+          fetch('/api/placement/drives'),
+          fetch('/api/placement/applications'),
+          fetch('/api/placement/notifications')
+        ]);
+
+        const drivesData = await drivesRes.json();
+        const appsData = await appsRes.json();
+        const notifsData = await notifsRes.json();
+
+        // Drives
+        const drivesTbody = document.getElementById('student-drives-tbody');
+        drivesTbody.innerHTML = '';
+        drivesData.drives.forEach(d => {
+          drivesTbody.innerHTML += `
+            <tr>
+              <td><strong>${d.title}</strong></td>
+              <td>${d.job_role}</td>
+              <td><span class="badge badge-success">${d.ctc_lpa} LPA</span></td>
+              <td>${d.min_cgpa}</td>
+              <td>
+                <button type="button" class="btn btn-primary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="applyDrive(${d.id})">
+                  Apply Now
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+
+        // Applications
+        const appsTbody = document.getElementById('student-apps-tbody');
+        appsTbody.innerHTML = '';
+        appsData.applications.filter(a => a.student_id === 1).forEach(a => {
+          let badgeClass = 'badge-info';
+          if (a.status === 'shortlisted') badgeClass = 'badge-accent';
+          if (a.status === 'selected') badgeClass = 'badge-success';
+          if (a.status === 'rejected') badgeClass = 'badge-danger';
+
+          appsTbody.innerHTML += `
+            <tr>
+              <td><strong>#APP-00${a.id}</strong></td>
+              <td>Drive #${a.drive_id}</td>
+              <td>${new Date(a.applied_at).toLocaleDateString()}</td>
+              <td><span class="badge ${badgeClass}">${a.status}</span></td>
+            </tr>
+          `;
+        });
+
+        // Notifications
+        const notifsBox = document.getElementById('notifications-list');
+        notifsBox.innerHTML = '';
+        notifsData.notifications.forEach(n => {
+          notifsBox.innerHTML += `
+            <div style="background: #f8fafc; border: 1px solid var(--border); padding: 0.75rem; border-radius: 6px;">
+              <div style="font-weight: 700; font-size: 0.85rem; color: var(--primary);">${n.title}</div>
+              <div style="font-size: 0.8rem; color: var(--text-main); margin-top: 0.2rem;">${n.message}</div>
+              <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.25rem;">${new Date(n.created_at).toLocaleTimeString()}</div>
+            </div>
+          `;
+        });
+        document.getElementById('notif-count').innerText = `${notifsData.notifications.length} Alerts`;
+
+      } catch (err) {
+        console.warn('Error loading student data:', err);
+      }
+    }
+
+    async function applyDrive(driveId) {
+      try {
+        const res = await fetch('/api/placement/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ studentId: 1, driveId })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+        alert('Success: ' + json.message);
+        loadStudentData();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadStudentData);
+  </script>
+</body>
+</html>

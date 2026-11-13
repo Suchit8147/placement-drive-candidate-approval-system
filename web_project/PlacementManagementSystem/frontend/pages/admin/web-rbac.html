@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Tech Impl 2: Role-Based Access Control | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">Web Tech Engine</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html">Admin Dashboard</a>
+      <a href="web-form-validation.html">Form Validation</a>
+      <a href="web-rbac.html" class="active">RBAC Demo</a>
+      <a href="se-traceability.html">SE Traceability</a>
+      <a href="se-testing-dashboard.html">SE Testing</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <div class="badge badge-success" style="margin-bottom: 0.35rem;">Engine 3 – Web Technology • Implementation 2</div>
+        <h1 class="page-title">Role-Based Access Control (RBAC) & Route Security</h1>
+        <p class="page-subtitle">Demonstrates backend endpoint protection, JWT claims verification, and permission enforcement across the 4 user roles.</p>
+      </div>
+      <div>
+        <a href="../../index.html" class="btn btn-outline">← Back to Portal</a>
+      </div>
+    </div>
+
+    <!-- 4 Role Permission Matrix Card -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <div class="card-title">System Role-Based Access Matrix</div>
+      <div class="table-responsive">
+        <table class="table" style="font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th>Role</th>
+              <th>Create Placement Drive</th>
+              <th>Allocate Rooms & Panels</th>
+              <th>Apply for Drive</th>
+              <th>Shortlist / Reject Applicants</th>
+              <th>Submit Interview Scores</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-primary">Admin</span></td>
+              <td><span class="badge badge-success">✓ Allowed</span></td>
+              <td><span class="badge badge-success">✓ Allowed</span></td>
+              <td><span class="badge badge-danger">✕ Denied</span></td>
+              <td><span class="badge badge-success">✓ Allowed</span></td>
+              <td><span class="badge badge-success">✓ Allowed</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-success">Student</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-success">✓ Allowed</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-accent">HR / Recruiter</span></td>
+              <td><span class="badge badge-info">✓ View Own</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-success">✓ Allowed</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-warning">Interviewer</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-danger">✕ Denied (403)</span></td>
+              <td><span class="badge badge-success">✓ Allowed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Live Permission Test Controller -->
+      <div class="card">
+        <div class="card-title">Live RBAC Route Permission Tester</div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Select a role identity and attempt to access a protected backend REST endpoint:
+        </p>
+
+        <form id="rbac-test-form">
+          <div class="form-group">
+            <label class="form-label">Simulate User Identity / Role:</label>
+            <select class="form-control" id="sim-role">
+              <option value="student">Student (user: student1@college.edu)</option>
+              <option value="admin">Admin (user: admin@college.edu)</option>
+              <option value="hr">HR Representative (user: hr@google.com)</option>
+              <option value="interviewer">Interviewer (user: interviewer1@college.edu)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Target Protected Endpoint:</label>
+            <select class="form-control" id="target-endpoint">
+              <option value="admin-only">GET /api/webtech/admin-only (Requires Admin)</option>
+              <option value="student-only">GET /api/webtech/student-only (Requires Student)</option>
+              <option value="hr-only">GET /api/webtech/hr-only (Requires HR)</option>
+              <option value="interviewer-only">GET /api/webtech/interviewer-only (Requires Interviewer)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            🔒 Test Endpoint Access Permissions
+          </button>
+        </form>
+
+        <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-outline" style="font-size: 0.8rem;" onclick="setRBACTest('student', 'admin-only')">
+            Test Student → Admin Endpoint (Expect 403)
+          </button>
+          <button type="button" class="btn btn-outline" style="font-size: 0.8rem;" onclick="setRBACTest('admin', 'admin-only')">
+            Test Admin → Admin Endpoint (Expect 200)
+          </button>
+        </div>
+
+        <div class="info-callout" style="margin-top: 1.5rem;">
+          <strong>Security Principle:</strong>
+          The application does NOT rely merely on hiding frontend buttons. All sensitive APIs verify JWT claims inside backend Express middleware (`authorizeRoles`), ensuring API tampering is impossible.
+        </div>
+      </div>
+
+      <!-- Access Response Console -->
+      <div class="card">
+        <div class="card-title">Backend Security Response</div>
+
+        <div id="rbac-result-banner" style="padding: 1.25rem; border-radius: 8px; text-align: center; background: #f1f5f9; color: var(--text-muted); margin-bottom: 1rem;">
+          Awaiting permission check request.
+        </div>
+
+        <div id="rbac-details" style="display: none;">
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">HTTP Authorization Trace</h4>
+          <div style="background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem;" id="rbac-json-log"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    function setRBACTest(role, endpoint) {
+      document.getElementById('sim-role').value = role;
+      document.getElementById('target-endpoint').value = endpoint;
+      document.getElementById('rbac-test-form').dispatchEvent(new Event('submit'));
+    }
+
+    document.getElementById('rbac-test-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const simulatedRole = document.getElementById('sim-role').value;
+      const targetResource = document.getElementById('target-endpoint').value;
+
+      try {
+        const res = await fetch('/api/webtech/simulate-rbac', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ simulatedRole, targetResource })
+        });
+        const json = await res.json();
+
+        const banner = document.getElementById('rbac-result-banner');
+        const details = document.getElementById('rbac-details');
+        const logBox = document.getElementById('rbac-json-log');
+
+        details.style.display = 'block';
+
+        if (json.isAuthorized) {
+          banner.style.background = 'var(--success-light)';
+          banner.style.color = 'var(--success)';
+          banner.innerHTML = `
+            <div style="font-size: 1.3rem; font-weight: 800;">HTTP 200 OK – ACCESS GRANTED</div>
+            <div style="font-size: 0.85rem; margin-top: 0.25rem;">Role '${simulatedRole.toUpperCase()}' verified with valid credentials. Request served.</div>
+          `;
+        } else {
+          banner.style.background = 'var(--danger-light)';
+          banner.style.color = 'var(--danger)';
+          banner.innerHTML = `
+            <div style="font-size: 1.3rem; font-weight: 800;">HTTP 403 FORBIDDEN – ACCESS DENIED</div>
+            <div style="font-size: 0.85rem; margin-top: 0.25rem;">Security Violation: Role '${simulatedRole.toUpperCase()}' lacks permission for '${targetResource}'.</div>
+          `;
+        }
+
+        logBox.innerHTML = `
+// Backend RBAC Dispatcher Trace:
+{
+  "httpStatus": ${json.status},
+  "isAuthorized": ${json.isAuthorized},
+  "simulatedRole": "${json.simulatedRole}",
+  "targetResource": "/api/webtech/${json.targetResource}",
+  "decision": "${json.isAuthorized ? 'PERMIT' : 'BLOCK'}",
+  "explanation": "${json.explanation}"
+}
+        `;
+
+      } catch (err) {
+        alert('RBAC Test Error: ' + err.message);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setRBACTest('student', 'admin-only');
+    });
+  </script>
+</body>
+</html>

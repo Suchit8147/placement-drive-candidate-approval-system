@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSPP Impl 2: Priority Scheduling | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">OSPP Engine</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html">Admin Dashboard</a>
+      <a href="ospp-fcfs.html">FCFS</a>
+      <a href="ospp-priority.html" class="active">Priority</a>
+      <a href="interval-detection.html">DSA Interval</a>
+      <a href="greedy-allocation.html">DSA Greedy</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <div class="badge badge-info" style="margin-bottom: 0.35rem;">Engine 1 – OSPP • Implementation 2</div>
+        <h1 class="page-title">Priority Scheduling (Non-Preemptive with Arrival Times)</h1>
+        <p class="page-subtitle">Dispatches high-priority interview processes first, correctly factoring in arrival times and tie-breakers.</p>
+      </div>
+      <div>
+        <a href="../../index.html" class="btn btn-outline">← Back to Portal</a>
+      </div>
+    </div>
+
+    <!-- Priority Convention Callout -->
+    <div class="card" style="background: #eef2ff; border-left: 4px solid var(--accent); padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1rem; color: var(--accent); margin-bottom: 0.35rem;">📌 Priority Number Convention Explanation:</h3>
+      <p style="font-size: 0.9rem; color: #3730a3; margin: 0;">
+        <strong>Convention Adopted:</strong> <em>Smaller numeric values represent HIGHER priority</em> (e.g., Priority <code>1</code> is highest priority, Priority <code>2</code> is second highest, and Priority <code>5</code> is low priority).
+        This mirrors standard Unix process nice-value semantics and campus tier rankings (e.g., Tier 1 Dream > Tier 2 Core).
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <!-- Input Section -->
+      <div class="card">
+        <div class="card-title">
+          <span>Process Parameters & Priority</span>
+          <button type="button" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;" onclick="loadPreset()">Load Preset</button>
+        </div>
+
+        <form id="priority-form">
+          <div class="table-responsive">
+            <table class="table" id="priority-input-table">
+              <thead>
+                <tr>
+                  <th>Process / Candidate</th>
+                  <th>Arrival (AT)</th>
+                  <th>Burst (BT)</th>
+                  <th>Priority</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="priority-tbody">
+                <tr>
+                  <td><input type="text" class="form-control" value="Candidate A" required></td>
+                  <td><input type="number" class="form-control" value="0" min="0" required></td>
+                  <td><input type="number" class="form-control" value="4" min="1" required></td>
+                  <td><input type="number" class="form-control" value="3" min="1" required></td>
+                  <td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td>
+                </tr>
+                <tr>
+                  <td><input type="text" class="form-control" value="Candidate B (Top CGPA)" required></td>
+                  <td><input type="number" class="form-control" value="1" min="0" required></td>
+                  <td><input type="number" class="form-control" value="3" min="1" required></td>
+                  <td><input type="number" class="form-control" value="1" min="1" required></td>
+                  <td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td>
+                </tr>
+                <tr>
+                  <td><input type="text" class="form-control" value="Candidate C" required></td>
+                  <td><input type="number" class="form-control" value="2" min="0" required></td>
+                  <td><input type="number" class="form-control" value="2" min="1" required></td>
+                  <td><input type="number" class="form-control" value="2" min="1" required></td>
+                  <td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin: 1rem 0;">
+            <label class="form-label">Priority Order Convention:</label>
+            <div style="display: flex; gap: 1.5rem; font-size: 0.85rem;">
+              <label style="cursor: pointer;"><input type="radio" name="convention" value="lower" checked> <strong>Smaller number = Higher Priority</strong> (1 > 2 > 3)</label>
+              <label style="cursor: pointer;"><input type="radio" name="convention" value="higher"> Larger number = Higher Priority (3 > 2 > 1)</label>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="button" class="btn btn-outline" onclick="addRow()">+ Add Process</button>
+            <button type="submit" class="btn btn-primary" id="btn-run-prio">▶ Run Priority Scheduling</button>
+          </div>
+        </form>
+
+        <div class="info-callout" style="margin-top: 1.5rem;">
+          <strong>Real Project Integration:</strong>
+          In the placement system, interviewers prioritize candidates based on online test scores and CGPA percentiles. Candidates with Priority 1 are evaluated by premier company panels first.
+        </div>
+      </div>
+
+      <!-- Output Section -->
+      <div class="card">
+        <div class="card-title">Priority Execution & Gantt Chart</div>
+        <div id="prio-placeholder" style="color: var(--text-muted); text-align: center; padding: 3rem 1rem;">
+          Click "Run Priority Scheduling" to visualize execution order and Gantt timeline.
+        </div>
+
+        <div id="prio-content" style="display: none;">
+          <!-- Metrics Cards -->
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1; background: #e0f2fe; padding: 0.75rem; border-radius: 6px;">
+              <span style="font-size: 0.75rem; color: #0369a1; font-weight: 700; text-transform: uppercase;">Average Waiting Time</span>
+              <div id="prio-avg-wt" style="font-size: 1.4rem; font-weight: 800; color: #0284c7;">--</div>
+            </div>
+            <div style="flex: 1; background: #fef3c7; padding: 0.75rem; border-radius: 6px;">
+              <span style="font-size: 0.75rem; color: #92400e; font-weight: 700; text-transform: uppercase;">Average Turnaround Time</span>
+              <div id="prio-avg-tat" style="font-size: 1.4rem; font-weight: 800; color: #d97706;">--</div>
+            </div>
+            <div style="flex: 1; background: #d1fae5; padding: 0.75rem; border-radius: 6px;">
+              <span style="font-size: 0.75rem; color: #065f46; font-weight: 700; text-transform: uppercase;">Execution Order</span>
+              <div id="prio-exec-order" style="font-size: 1.1rem; font-weight: 800; color: #059669;">--</div>
+            </div>
+          </div>
+
+          <!-- Gantt Chart -->
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">Visual Gantt Chart</h4>
+          <div class="gantt-container">
+            <div class="gantt-bar-wrap" id="prio-gantt-bar"></div>
+            <div class="gantt-ticks" id="prio-gantt-ticks"></div>
+          </div>
+
+          <!-- Timings Table -->
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">Process Timings Breakdown</h4>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Process</th>
+                  <th>Arrival (AT)</th>
+                  <th>Burst (BT)</th>
+                  <th>Priority</th>
+                  <th>Completion (CT)</th>
+                  <th>Turnaround (TAT)</th>
+                  <th>Waiting (WT)</th>
+                </tr>
+              </thead>
+              <tbody id="prio-results-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- Step by Step Dispatch Log -->
+          <h4 style="font-size: 0.9rem; margin: 1rem 0 0.5rem 0; color: var(--primary);">Step-by-Step Priority Dispatch Log</h4>
+          <div id="prio-step-log" style="background: #f8fafc; border: 1px solid var(--border); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; max-height: 140px; overflow-y: auto;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    function addRow() {
+      const tbody = document.getElementById('priority-tbody');
+      const count = tbody.querySelectorAll('tr').length + 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" class="form-control" value="Candidate ${count}" required></td>
+        <td><input type="number" class="form-control" value="${count}" min="0" required></td>
+        <td><input type="number" class="form-control" value="3" min="1" required></td>
+        <td><input type="number" class="form-control" value="${count}" min="1" required></td>
+        <td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function removeRow(btn) {
+      const tbody = document.getElementById('priority-tbody');
+      if (tbody.querySelectorAll('tr').length > 1) {
+        btn.closest('tr').remove();
+      } else {
+        alert('At least one process is required.');
+      }
+    }
+
+    function loadPreset() {
+      const tbody = document.getElementById('priority-tbody');
+      tbody.innerHTML = `
+        <tr><td><input type="text" class="form-control" value="Super-Dream Interview" required></td><td><input type="number" class="form-control" value="0" min="0" required></td><td><input type="number" class="form-control" value="4" min="1" required></td><td><input type="number" class="form-control" value="1" min="1" required></td><td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td></tr>
+        <tr><td><input type="text" class="form-control" value="Dream Core Interview" required></td><td><input type="number" class="form-control" value="1" min="0" required></td><td><input type="number" class="form-control" value="3" min="1" required></td><td><input type="number" class="form-control" value="2" min="1" required></td><td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td></tr>
+        <tr><td><input type="text" class="form-control" value="Regular Tier Assessment" required></td><td><input type="number" class="form-control" value="2" min="0" required></td><td><input type="number" class="form-control" value="2" min="1" required></td><td><input type="number" class="form-control" value="3" min="1" required></td><td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td></tr>
+      `;
+      document.getElementById('priority-form').dispatchEvent(new Event('submit'));
+    }
+
+    document.getElementById('priority-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rows = document.querySelectorAll('#priority-tbody tr');
+      const processes = [];
+
+      rows.forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        processes.push({
+          id: inputs[0].value.trim(),
+          arrivalTime: parseInt(inputs[1].value, 10),
+          burstTime: parseInt(inputs[2].value, 10),
+          priority: parseInt(inputs[3].value, 10)
+        });
+      });
+
+      const lowerNumberHigherPriority = document.querySelector('input[name="convention"]:checked').value === 'lower';
+
+      try {
+        const res = await fetch('/api/ospp/priority', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ processes, lowerNumberHigherPriority })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+
+        const data = json.data;
+
+        document.getElementById('prio-placeholder').style.display = 'none';
+        document.getElementById('prio-content').style.display = 'block';
+
+        document.getElementById('prio-avg-wt').innerText = `${data.metrics.averageWaitingTime} units`;
+        document.getElementById('prio-avg-tat').innerText = `${data.metrics.averageTurnaroundTime} units`;
+        document.getElementById('prio-exec-order').innerText = data.executionOrder.join(' → ');
+
+        const tbody = document.getElementById('prio-results-tbody');
+        tbody.innerHTML = '';
+        data.processResults.forEach(r => {
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${r.id}</strong></td>
+              <td>${r.arrivalTime}</td>
+              <td>${r.burstTime}</td>
+              <td><span class="badge badge-accent">P: ${r.priority}</span></td>
+              <td>${r.completionTime}</td>
+              <td><strong>${r.turnaroundTime}</strong></td>
+              <td><strong>${r.waitingTime}</strong></td>
+            </tr>
+          `;
+        });
+
+        const barWrap = document.getElementById('prio-gantt-bar');
+        const ticksWrap = document.getElementById('prio-gantt-ticks');
+        barWrap.innerHTML = '';
+        ticksWrap.innerHTML = '';
+
+        const colors = ['#4f46e5', '#059669', '#d97706', '#dc2626', '#7c3aed', '#0891b2'];
+        let colorIdx = 0;
+        const totalDuration = data.metrics.totalExecutionTime;
+
+        data.ganttChart.forEach(block => {
+          const widthPercent = (block.duration / totalDuration) * 100;
+          const div = document.createElement('div');
+          div.className = `gantt-block ${block.isIdle ? 'gantt-idle' : ''}`;
+          div.style.width = `${widthPercent}%`;
+          div.style.backgroundColor = block.isIdle ? '#94a3b8' : colors[colorIdx++ % colors.length];
+          div.innerText = block.isIdle ? 'IDLE' : `${block.id} (P:${block.priority})`;
+          barWrap.appendChild(div);
+        });
+
+        ticksWrap.innerHTML = `<span>0</span>`;
+        data.ganttChart.forEach(block => {
+          ticksWrap.innerHTML += `<span>${block.endTime}</span>`;
+        });
+
+        const logBox = document.getElementById('prio-step-log');
+        logBox.innerHTML = data.stepByStepLog.map(l => `<div>${l}</div>`).join('');
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('priority-form').dispatchEvent(new Event('submit'));
+    });
+  </script>
+</body>
+</html>

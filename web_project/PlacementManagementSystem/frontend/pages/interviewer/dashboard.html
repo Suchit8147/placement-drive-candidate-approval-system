@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interviewer Panel Desk | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">Interviewer Desk</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="../admin/dashboard.html">Admin</a>
+      <a href="../student/dashboard.html">Student</a>
+      <a href="../hr/dashboard.html">HR</a>
+      <a href="dashboard.html" class="active">Interviewer Desk</a>
+      <a href="../../index.html#engines-section" class="btn btn-accent" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">Engines Lab</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Technical Interviewer & Panelist Desk</h1>
+        <p class="page-subtitle">View assigned interview venues, review candidate resumes, and record standardized scoring rubrics.</p>
+      </div>
+      <div>
+        <span class="badge badge-warning" style="font-size: 0.9rem; padding: 0.4rem 0.8rem;">Panelist: Dr. Ramesh Kumar (EMP-CS-01)</span>
+      </div>
+    </div>
+
+    <!-- Panelist Profile -->
+    <div class="card" style="margin-bottom: 1.5rem; background: #fffbeb; border-left: 4px solid #f59e0b;">
+      <h2 style="font-size: 1.25rem; color: #92400e;">👨‍🏫 Dr. Ramesh Kumar, Associate Professor</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
+        Department: <strong>Computer Science & Engineering</strong> | Specialization: <strong>Distributed Systems & Concurrency Algorithms</strong> | Active Cabin: <strong>Room-101</strong>
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <!-- Assigned Sessions -->
+      <div class="card">
+        <div class="card-title">My Assigned Interview Sessions</div>
+
+        <div style="background: #f8fafc; border: 1px solid var(--border); padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <strong style="color: var(--primary); font-size: 1rem;">Aarav Sharma (USN: 1MS21CS001)</strong>
+            <span class="badge badge-success">Scheduled</span>
+          </div>
+          <div style="font-size: 0.85rem; color: var(--text-main); margin-top: 0.4rem;">
+            Drive: <strong>Google Campus Drive 2026 (Software Engineer L3)</strong><br>
+            Round: <strong>Round 2: Technical Interview - System Design & DSA</strong><br>
+            Venue: <strong>Room-101 (Floor 1, Placement Block)</strong><br>
+            Time Window: <strong>2026-11-20 (10:00 AM – 11:00 AM)</strong>
+          </div>
+          <div style="margin-top: 0.75rem;">
+            <a href="https://drive.google.com/resume_aarav.pdf" target="_blank" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.25rem 0.6rem;">
+              📄 Inspect Candidate Resume
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scoring Rubric Form -->
+      <div class="card">
+        <div class="card-title">Candidate Evaluation & Scoring Rubric</div>
+
+        <form id="eval-form">
+          <div class="form-group">
+            <label class="form-label">Data Structures & Concurrency Algorithms (0 – 50 Marks):</label>
+            <input type="number" id="score-tech" class="form-control" min="0" max="50" value="45" required oninput="calcTotal()">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">System Design & Problem Solving (0 – 30 Marks):</label>
+            <input type="number" id="score-ps" class="form-control" min="0" max="30" value="26" required oninput="calcTotal()">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Technical Communication & Articulation (0 – 20 Marks):</label>
+            <input type="number" id="score-comm" class="form-control" min="0" max="20" value="18" required oninput="calcTotal()">
+          </div>
+
+          <div style="background: #e0f2fe; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; color: #0369a1; font-size: 0.9rem;">Computed Total Score:</span>
+            <span id="score-total" style="font-size: 1.4rem; font-weight: 800; color: #0284c7;">89 / 100</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Final Evaluation Recommendation:</label>
+            <select class="form-control" id="eval-decision">
+              <option value="recommended">✓ Highly Recommended (Advance to Next Stage)</option>
+              <option value="on_hold">⏸ On-Hold (Borderline)</option>
+              <option value="not_recommended">✕ Not Recommended (Reject)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Qualitative Technical Feedback:</label>
+            <textarea class="form-control" id="eval-feedback" rows="3" required>Demonstrated exceptional mastery over interval overlap algorithms, mutex locks, and deadlock avoidance. Recommended for final offer.</textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            💾 Submit Candidate Evaluation
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    function calcTotal() {
+      const tech = parseInt(document.getElementById('score-tech').value, 10) || 0;
+      const ps = parseInt(document.getElementById('score-ps').value, 10) || 0;
+      const comm = parseInt(document.getElementById('score-comm').value, 10) || 0;
+      const total = tech + ps + comm;
+      document.getElementById('score-total').innerText = `${total} / 100`;
+    }
+
+    document.getElementById('eval-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const decision = document.getElementById('eval-decision').value;
+      const totalText = document.getElementById('score-total').innerText;
+      alert(`Candidate evaluation successfully recorded!\nTotal Score: ${totalText}\nDecision: ${decision.toUpperCase()}\nPersisted to MySQL database.`);
+    });
+  </script>
+</body>
+</html>

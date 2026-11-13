@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Tech Impl 1: Form Validation Demo | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <script src="../../js/validation.js"></script>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">Web Tech Engine</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html">Admin Dashboard</a>
+      <a href="web-form-validation.html" class="active">Form Validation</a>
+      <a href="web-rbac.html">RBAC Demo</a>
+      <a href="se-traceability.html">SE Traceability</a>
+      <a href="se-testing-dashboard.html">SE Testing</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <div class="badge badge-success" style="margin-bottom: 0.35rem;">Engine 3 – Web Technology • Implementation 1</div>
+        <h1 class="page-title">Client-Side & Server-Side Form Validation Demo</h1>
+        <p class="page-subtitle">Demonstrates real-time regex validation, boundary checks, and error feedback across critical system forms.</p>
+      </div>
+      <div>
+        <a href="../../index.html" class="btn btn-outline">← Back to Portal</a>
+      </div>
+    </div>
+
+    <!-- Tab Selector -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+      <button type="button" class="btn btn-primary" id="tab-student-btn" onclick="switchTab('student')">1. Student Registration Form</button>
+      <button type="button" class="btn btn-outline" id="tab-schedule-btn" onclick="switchTab('schedule')">2. Interview Scheduling Form</button>
+      <button type="button" class="btn btn-outline" id="tab-drive-btn" onclick="switchTab('drive')">3. Placement Drive Form</button>
+    </div>
+
+    <div class="grid-2">
+      <!-- Active Form Card -->
+      <div class="card">
+        <!-- Form 1: Student Registration -->
+        <div id="form-student-wrap">
+          <div class="card-title">Student Registration Form Validation</div>
+          <div style="margin-bottom: 1rem;">
+            <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;" onclick="fillStudentPreset(true)">Fill Valid Data</button>
+            <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;" onclick="fillStudentPreset(false)">Fill Invalid Data (Trigger Errors)</button>
+          </div>
+
+          <form id="student-demo-form">
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input type="text" id="stu-name" class="form-control" placeholder="e.g. Diya Patel" required>
+              <small id="stu-name-msg" style="font-size: 0.75rem; font-weight: 600;"></small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Institutional Email * (Regex Pattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$)</label>
+              <input type="text" id="stu-email" class="form-control" placeholder="e.g. student@college.edu" required>
+              <small id="stu-email-msg" style="font-size: 0.75rem; font-weight: 600;"></small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Password * (Minimum 6 Characters)</label>
+              <input type="password" id="stu-pwd" class="form-control" placeholder="••••••••" required>
+              <small id="stu-pwd-msg" style="font-size: 0.75rem; font-weight: 600;"></small>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Academic CGPA * (Numeric Range: 0.00 – 10.00)</label>
+              <input type="text" id="stu-cgpa" class="form-control" placeholder="e.g. 8.75" required>
+              <small id="stu-cgpa-msg" style="font-size: 0.75rem; font-weight: 600;"></small>
+            </div>
+
+            <button type="submit" class="btn btn-success" style="width: 100%;">Validate & Test Submission</button>
+          </form>
+        </div>
+
+        <!-- Form 2: Interview Scheduling -->
+        <div id="form-schedule-wrap" style="display: none;">
+          <div class="card-title">Interview Scheduling Form Validation</div>
+          <div style="margin-bottom: 1rem;">
+            <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;" onclick="fillSchedulePreset(true)">Fill Valid Time Slot</button>
+            <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.2rem 0.5rem;" onclick="fillSchedulePreset(false)">Fill Inverted Time (End &lt; Start)</button>
+          </div>
+
+          <form id="schedule-demo-form">
+            <div class="form-group">
+              <label class="form-label">Room ID / Venue Selection *</label>
+              <select id="sched-room" class="form-control">
+                <option value="1">Room-101 (Cabin 1)</option>
+                <option value="2">Room-102 (Cabin 2)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Interview Start Time *</label>
+              <input type="datetime-local" id="sched-start" class="form-control" value="2026-11-20T10:00" required>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Interview End Time * (Must be strictly after start time)</label>
+              <input type="datetime-local" id="sched-end" class="form-control" value="2026-11-20T11:00" required>
+              <small id="sched-time-msg" style="font-size: 0.75rem; font-weight: 600;"></small>
+            </div>
+
+            <button type="submit" class="btn btn-success" style="width: 100%;">Validate Schedule Bounds</button>
+          </form>
+        </div>
+
+        <!-- Form 3: Placement Drive -->
+        <div id="form-drive-wrap" style="display: none;">
+          <div class="card-title">Placement Drive Creation Form</div>
+          <form id="drive-demo-form">
+            <div class="form-group">
+              <label class="form-label">Drive Title *</label>
+              <input type="text" id="drv-title" class="form-control" value="Microsoft Azure Hiring 2026" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Package (CTC in LPA) * (Must be positive numeric)</label>
+              <input type="number" step="0.5" id="drv-ctc" class="form-control" value="24.50" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Cutoff CGPA * (0.00 – 10.00)</label>
+              <input type="number" step="0.1" id="drv-cgpa" class="form-control" value="7.50" required>
+            </div>
+            <button type="submit" class="btn btn-success" style="width: 100%;">Validate Drive Form</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Real-Time Validation Console -->
+      <div class="card">
+        <div class="card-title">Validation Feedback & Server Verification</div>
+
+        <div id="val-summary-banner" style="padding: 1rem; border-radius: 6px; background: #f1f5f9; text-align: center; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Modify form fields on the left to see live client and server validation responses.
+        </div>
+
+        <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">Detailed Field Checks</h4>
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Field Tested</th>
+                <th>Validation Status</th>
+                <th>Diagnostic Message</th>
+              </tr>
+            </thead>
+            <tbody id="val-feedback-tbody">
+              <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Awaiting form submission or keystroke test.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="info-callout" style="margin-top: 1.5rem;">
+          <strong>Architecture Rule:</strong>
+          Frontend JavaScript validation provides instant UI responsiveness and prevents redundant network requests. The Express backend runs identical middleware validation to prevent malicious API bypassing.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    function switchTab(tab) {
+      document.getElementById('form-student-wrap').style.display = tab === 'student' ? 'block' : 'none';
+      document.getElementById('form-schedule-wrap').style.display = tab === 'schedule' ? 'block' : 'none';
+      document.getElementById('form-drive-wrap').style.display = tab === 'drive' ? 'block' : 'none';
+
+      document.getElementById('tab-student-btn').className = tab === 'student' ? 'btn btn-primary' : 'btn btn-outline';
+      document.getElementById('tab-schedule-btn').className = tab === 'schedule' ? 'btn btn-primary' : 'btn btn-outline';
+      document.getElementById('tab-drive-btn').className = tab === 'drive' ? 'btn btn-primary' : 'btn btn-outline';
+    }
+
+    function fillStudentPreset(isValid) {
+      if (isValid) {
+        document.getElementById('stu-name').value = 'Diya Patel';
+        document.getElementById('stu-email').value = 'diya.patel@college.edu';
+        document.getElementById('stu-pwd').value = 'SecurePass@123';
+        document.getElementById('stu-cgpa').value = '9.15';
+      } else {
+        document.getElementById('stu-name').value = '';
+        document.getElementById('stu-email').value = 'invalid-email-address';
+        document.getElementById('stu-pwd').value = '123';
+        document.getElementById('stu-cgpa').value = '14.50';
+      }
+      document.getElementById('student-demo-form').dispatchEvent(new Event('submit'));
+    }
+
+    function fillSchedulePreset(isValid) {
+      if (isValid) {
+        document.getElementById('sched-start').value = '2026-11-20T10:00';
+        document.getElementById('sched-end').value = '2026-11-20T11:00';
+      } else {
+        document.getElementById('sched-start').value = '2026-11-20T11:00';
+        document.getElementById('sched-end').value = '2026-11-20T10:00'; // Inverted!
+      }
+      document.getElementById('schedule-demo-form').dispatchEvent(new Event('submit'));
+    }
+
+    // Student Form Submit
+    document.getElementById('student-demo-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('stu-name').value;
+      const email = document.getElementById('stu-email').value;
+      const password = document.getElementById('stu-pwd').value;
+      const cgpa = document.getElementById('stu-cgpa').value;
+
+      // 1. Client-side validation using FormValidator
+      const vName = FormValidator.isRequired(name, 'Full Name');
+      const vEmail = FormValidator.isValidEmail(email);
+      const vPwd = FormValidator.isValidPassword(password, 6);
+      const vCgpa = FormValidator.isNumericInRange(cgpa, 0.0, 10.0, 'CGPA');
+
+      const allValid = vName.valid && vEmail.valid && vPwd.valid && vCgpa.valid;
+
+      // Update inline UI
+      updateFieldUI('stu-name', vName);
+      updateFieldUI('stu-email', vEmail);
+      updateFieldUI('stu-pwd', vPwd);
+      updateFieldUI('stu-cgpa', vCgpa);
+
+      // 2. Call Backend Validation Endpoint
+      try {
+        const res = await fetch('/api/webtech/validate-demo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            formType: 'student_registration',
+            formData: { name, email, password, cgpa }
+          })
+        });
+        const json = await res.json();
+        renderFeedbackTable(json.validationResults, json.isValid);
+      } catch (err) {
+        alert('Server validation error: ' + err.message);
+      }
+    });
+
+    // Schedule Form Submit
+    document.getElementById('schedule-demo-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const roomId = document.getElementById('sched-room').value;
+      const startTime = document.getElementById('sched-start').value.replace('T', ' ') + ':00';
+      const endTime = document.getElementById('sched-end').value.replace('T', ' ') + ':00';
+
+      const vTime = FormValidator.isValidTimeWindow(startTime, endTime);
+      const timeMsg = document.getElementById('sched-time-msg');
+      timeMsg.innerText = vTime.message;
+      timeMsg.style.color = vTime.valid ? 'var(--success)' : 'var(--danger)';
+
+      try {
+        const res = await fetch('/api/webtech/validate-demo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            formType: 'interview_scheduling',
+            formData: { room_id: roomId, start_time: startTime, end_time: endTime }
+          })
+        });
+        const json = await res.json();
+        renderFeedbackTable(json.validationResults, json.isValid);
+      } catch (err) {
+        alert('Server validation error: ' + err.message);
+      }
+    });
+
+    function updateFieldUI(fieldId, valObj) {
+      const msg = document.getElementById(fieldId + '-msg');
+      if (msg) {
+        msg.innerText = valObj.message;
+        msg.style.color = valObj.valid ? 'var(--success)' : 'var(--danger)';
+      }
+    }
+
+    function renderFeedbackTable(results, isValid) {
+      const banner = document.getElementById('val-summary-banner');
+      if (isValid) {
+        banner.style.background = 'var(--success-light)';
+        banner.style.color = 'var(--success)';
+        banner.innerHTML = '<strong>✓ ALL VALIDATIONS PASSED:</strong> Form is clean and ready for database persistence.';
+      } else {
+        banner.style.background = 'var(--danger-light)';
+        banner.style.color = 'var(--danger)';
+        banner.innerHTML = '<strong>⛔ VALIDATION REJECTED:</strong> Form contains schema violations. Submission blocked.';
+      }
+
+      const tbody = document.getElementById('val-feedback-tbody');
+      tbody.innerHTML = '';
+      results.forEach(r => {
+        tbody.innerHTML += `
+          <tr style="background: ${r.valid ? '#f0fdf4' : '#fff1f2'};">
+            <td><strong>${r.field.toUpperCase()}</strong></td>
+            <td><span class="badge ${r.valid ? 'badge-success' : 'badge-danger'}">${r.valid ? 'PASSED' : 'FAILED'}</span></td>
+            <td>${r.message}</td>
+          </tr>
+        `;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fillStudentPreset(true);
+    });
+  </script>
+</body>
+</html>

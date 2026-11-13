@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSPP Impl 1: FCFS Scheduling | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">OSPP Engine</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html">Admin Dashboard</a>
+      <a href="ospp-fcfs.html" class="active">FCFS</a>
+      <a href="ospp-priority.html">Priority</a>
+      <a href="interval-detection.html">DSA Interval</a>
+      <a href="greedy-allocation.html">DSA Greedy</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <div class="badge badge-info" style="margin-bottom: 0.35rem;">Engine 1 – OSPP • Implementation 1</div>
+        <h1 class="page-title">First-Come, First-Served (FCFS) Scheduling</h1>
+        <p class="page-subtitle">Schedules interview-related processes strictly in order of their arrival time.</p>
+      </div>
+      <div>
+        <a href="../../index.html" class="btn btn-outline">← Back to Portal</a>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Input Section -->
+      <div class="card">
+        <div class="card-title">
+          <span>Input Process Table</span>
+          <button type="button" class="btn btn-outline" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;" onclick="loadPreset()">Load Preset</button>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          Configure candidate verification or interview queue processes with arrival and burst times:
+        </p>
+
+        <form id="fcfs-form">
+          <table class="table" id="process-input-table">
+            <thead>
+              <tr>
+                <th>Process ID</th>
+                <th>Arrival Time</th>
+                <th>Burst Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="process-tbody">
+              <!-- Default rows -->
+              <tr>
+                <td><input type="text" class="form-control" value="P1" required></td>
+                <td><input type="number" class="form-control" value="0" min="0" required></td>
+                <td><input type="number" class="form-control" value="5" min="1" required></td>
+                <td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="form-control" value="P2" required></td>
+                <td><input type="number" class="form-control" value="2" min="0" required></td>
+                <td><input type="number" class="form-control" value="3" min="1" required></td>
+                <td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td>
+              </tr>
+              <tr>
+                <td><input type="text" class="form-control" value="P3" required></td>
+                <td><input type="number" class="form-control" value="4" min="0" required></td>
+                <td><input type="number" class="form-control" value="2" min="1" required></td>
+                <td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+            <button type="button" class="btn btn-outline" onclick="addRow()">+ Add Process</button>
+            <button type="submit" class="btn btn-primary" id="btn-run">▶ Run FCFS</button>
+          </div>
+        </form>
+
+        <div class="info-callout" style="margin-top: 1.5rem;">
+          <strong>Real Project Integration:</strong>
+          In the placement portal, student registration approvals and document verification queues are dispatched using FCFS semantics to ensure strict chronological fairness and zero starvation.
+        </div>
+      </div>
+
+      <!-- Output Section -->
+      <div class="card">
+        <div class="card-title">Execution Results & Gantt Chart</div>
+        <div id="output-placeholder" style="color: var(--text-muted); text-align: center; padding: 3rem 1rem;">
+          Click "Run FCFS" to view schedule execution order, Gantt chart, and calculated times.
+        </div>
+
+        <div id="output-content" style="display: none;">
+          <!-- Execution Order & Averages -->
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <div style="flex: 1; background: #e0f2fe; padding: 0.75rem; border-radius: 6px;">
+              <span style="font-size: 0.75rem; color: #0369a1; font-weight: 700; text-transform: uppercase;">Average Waiting Time</span>
+              <div id="avg-wt" style="font-size: 1.4rem; font-weight: 800; color: #0284c7;">--</div>
+            </div>
+            <div style="flex: 1; background: #fef3c7; padding: 0.75rem; border-radius: 6px;">
+              <span style="font-size: 0.75rem; color: #92400e; font-weight: 700; text-transform: uppercase;">Average Turnaround Time</span>
+              <div id="avg-tat" style="font-size: 1.4rem; font-weight: 800; color: #d97706;">--</div>
+            </div>
+            <div style="flex: 1; background: #d1fae5; padding: 0.75rem; border-radius: 6px;">
+              <span style="font-size: 0.75rem; color: #065f46; font-weight: 700; text-transform: uppercase;">Execution Order</span>
+              <div id="exec-order" style="font-size: 1.1rem; font-weight: 800; color: #059669;">--</div>
+            </div>
+          </div>
+
+          <!-- Gantt Chart -->
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">Visual Gantt Chart</h4>
+          <div class="gantt-container">
+            <div class="gantt-bar-wrap" id="gantt-bar"></div>
+            <div class="gantt-ticks" id="gantt-ticks"></div>
+          </div>
+
+          <!-- Results Table -->
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">Process Timings Breakdown</h4>
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Process</th>
+                  <th>Arrival (AT)</th>
+                  <th>Burst (BT)</th>
+                  <th>Completion (CT)</th>
+                  <th>Turnaround (TAT)</th>
+                  <th>Waiting (WT)</th>
+                </tr>
+              </thead>
+              <tbody id="results-tbody"></tbody>
+            </table>
+          </div>
+
+          <!-- Step by Step Log -->
+          <h4 style="font-size: 0.9rem; margin: 1rem 0 0.5rem 0; color: var(--primary);">Execution Step-by-Step Log</h4>
+          <div id="step-log" style="background: #f8fafc; border: 1px solid var(--border); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; max-height: 140px; overflow-y: auto;"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    function addRow() {
+      const tbody = document.getElementById('process-tbody');
+      const count = tbody.querySelectorAll('tr').length + 1;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" class="form-control" value="P${count}" required></td>
+        <td><input type="number" class="form-control" value="${count * 2}" min="0" required></td>
+        <td><input type="number" class="form-control" value="3" min="1" required></td>
+        <td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    function removeRow(btn) {
+      const tbody = document.getElementById('process-tbody');
+      if (tbody.querySelectorAll('tr').length > 1) {
+        btn.closest('tr').remove();
+      } else {
+        alert('At least one process is required.');
+      }
+    }
+
+    function loadPreset() {
+      const tbody = document.getElementById('process-tbody');
+      tbody.innerHTML = `
+        <tr><td><input type="text" class="form-control" value="Candidate A" required></td><td><input type="number" class="form-control" value="0" min="0" required></td><td><input type="number" class="form-control" value="4" min="1" required></td><td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td></tr>
+        <tr><td><input type="text" class="form-control" value="Candidate B" required></td><td><input type="number" class="form-control" value="1" min="0" required></td><td><input type="number" class="form-control" value="3" min="1" required></td><td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td></tr>
+        <tr><td><input type="text" class="form-control" value="Candidate C" required></td><td><input type="number" class="form-control" value="3" min="0" required></td><td><input type="number" class="form-control" value="1" min="1" required></td><td><button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem;" onclick="removeRow(this)">✕</button></td></tr>
+      `;
+      document.getElementById('fcfs-form').dispatchEvent(new Event('submit'));
+    }
+
+    document.getElementById('fcfs-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const rows = document.querySelectorAll('#process-tbody tr');
+      const processes = [];
+
+      rows.forEach(tr => {
+        const inputs = tr.querySelectorAll('input');
+        processes.push({
+          id: inputs[0].value.trim(),
+          arrivalTime: parseInt(inputs[1].value, 10),
+          burstTime: parseInt(inputs[2].value, 10)
+        });
+      });
+
+      try {
+        const res = await fetch('/api/ospp/fcfs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ processes })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+
+        const data = json.data;
+
+        // Show Output
+        document.getElementById('output-placeholder').style.display = 'none';
+        document.getElementById('output-content').style.display = 'block';
+
+        // Set metrics
+        document.getElementById('avg-wt').innerText = `${data.metrics.averageWaitingTime} units`;
+        document.getElementById('avg-tat').innerText = `${data.metrics.averageTurnaroundTime} units`;
+        document.getElementById('exec-order').innerText = data.executionOrder.join(' → ');
+
+        // Populate table
+        const tbody = document.getElementById('results-tbody');
+        tbody.innerHTML = '';
+        data.processResults.forEach(r => {
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${r.id}</strong></td>
+              <td>${r.arrivalTime}</td>
+              <td>${r.burstTime}</td>
+              <td>${r.completionTime}</td>
+              <td><strong>${r.turnaroundTime}</strong></td>
+              <td><strong>${r.waitingTime}</strong></td>
+            </tr>
+          `;
+        });
+
+        // Populate Gantt Chart
+        const barWrap = document.getElementById('gantt-bar');
+        const ticksWrap = document.getElementById('gantt-ticks');
+        barWrap.innerHTML = '';
+        ticksWrap.innerHTML = '';
+
+        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+        let colorIdx = 0;
+        const totalDuration = data.metrics.totalExecutionTime;
+
+        data.ganttChart.forEach((block, idx) => {
+          const widthPercent = (block.duration / totalDuration) * 100;
+          const div = document.createElement('div');
+          div.className = `gantt-block ${block.isIdle ? 'gantt-idle' : ''}`;
+          div.style.width = `${widthPercent}%`;
+          div.style.backgroundColor = block.isIdle ? '#94a3b8' : colors[colorIdx++ % colors.length];
+          div.innerText = block.id;
+          barWrap.appendChild(div);
+        });
+
+        ticksWrap.innerHTML = `<span>0</span>`;
+        data.ganttChart.forEach(block => {
+          ticksWrap.innerHTML += `<span>${block.endTime}</span>`;
+        });
+
+        // Step Log
+        const logBox = document.getElementById('step-log');
+        logBox.innerHTML = data.stepByStepLog.map(l => `<div>${l}</div>`).join('');
+
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    // Auto-run default on load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('fcfs-form').dispatchEvent(new Event('submit'));
+    });
+  </script>
+</body>
+</html>
