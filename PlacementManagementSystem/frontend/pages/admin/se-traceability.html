@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SE Impl 1: Requirement Traceability Matrix | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">SE Engine</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html">Admin Dashboard</a>
+      <a href="se-traceability.html" class="active">Traceability (RTM)</a>
+      <a href="se-testing-dashboard.html">Testing Dashboard</a>
+      <a href="dbms-transaction.html">DBMS Tx</a>
+      <a href="dbms-procedures.html">DBMS Procs</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <div class="badge badge-warning" style="margin-bottom: 0.35rem;">Engine 4 – Software Engineering • Implementation 1</div>
+        <h1 class="page-title">Requirement Traceability Matrix (RTM)</h1>
+        <p class="page-subtitle">Demonstrates end-to-end bidirectional traceability connecting user requirements, architectural modules, and verification test cases.</p>
+      </div>
+      <div>
+        <a href="../../index.html" class="btn btn-outline">← Back to Portal</a>
+      </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid-3" style="margin-bottom: 1.5rem;">
+      <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Total Requirements</span>
+        <div id="total-reqs" style="font-size: 1.8rem; font-weight: 800; color: var(--primary);">13</div>
+      </div>
+      <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Functional Requirements</span>
+        <div id="func-reqs" style="font-size: 1.8rem; font-weight: 800; color: var(--info);">9</div>
+      </div>
+      <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Non-Functional (NFR)</span>
+        <div id="nfr-reqs" style="font-size: 1.8rem; font-weight: 800; color: var(--warning);">4</div>
+      </div>
+    </div>
+
+    <!-- RTM Table Card -->
+    <div class="card">
+      <div class="card-title">
+        <span>Bidirectional Requirement Traceability Table</span>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-outline" style="font-size: 0.8rem; padding: 0.2rem 0.6rem;" onclick="filterTable('all')">Show All</button>
+          <button class="btn btn-outline" style="font-size: 0.8rem; padding: 0.2rem 0.6rem;" onclick="filterTable('Functional')">Functional Only</button>
+          <button class="btn btn-outline" style="font-size: 0.8rem; padding: 0.2rem 0.6rem;" onclick="filterTable('Non-Functional')">NFR Only</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table" id="rtm-table">
+          <thead>
+            <tr>
+              <th>Req ID</th>
+              <th>Requirement Classification</th>
+              <th>Requirement Description</th>
+              <th>Architectural Module</th>
+              <th>Verification Test Case</th>
+              <th>Implementation Status</th>
+            </tr>
+          </thead>
+          <tbody id="rtm-tbody">
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading Requirement Traceability Matrix...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-callout" style="margin-top: 1.5rem;">
+        <strong>Software Engineering Objective:</strong>
+        Requirement traceability ensures that every customer specification maps to a concrete implementation unit and has an associated verification test case, guaranteeing 100% test coverage and zero orphaned code.
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    let cachedReqs = [];
+
+    async function loadRTM() {
+      try {
+        const res = await fetch('/api/se/traceability');
+        const json = await res.json();
+        cachedReqs = json.data;
+        renderRTM(cachedReqs);
+      } catch (err) {
+        alert('Failed to load RTM data: ' + err.message);
+      }
+    }
+
+    function renderRTM(reqs) {
+      const tbody = document.getElementById('rtm-tbody');
+      tbody.innerHTML = '';
+      reqs.forEach(r => {
+        const isNFR = r.type.includes('Non-Functional');
+        tbody.innerHTML += `
+          <tr data-type="${isNFR ? 'Non-Functional' : 'Functional'}">
+            <td><strong>${r.reqId}</strong></td>
+            <td><span class="badge ${isNFR ? 'badge-warning' : 'badge-info'}">${r.type}</span></td>
+            <td>${r.description}</td>
+            <td><code>${r.module}</code></td>
+            <td><a href="se-testing-dashboard.html" style="font-weight: 700; color: var(--accent);">${r.testCaseId}</a></td>
+            <td><span class="badge badge-success">● ${r.status}</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    function filterTable(filter) {
+      if (filter === 'all') {
+        renderRTM(cachedReqs);
+      } else {
+        const filtered = cachedReqs.filter(r => r.type.includes(filter));
+        renderRTM(filtered);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadRTM);
+  </script>
+</body>
+</html>

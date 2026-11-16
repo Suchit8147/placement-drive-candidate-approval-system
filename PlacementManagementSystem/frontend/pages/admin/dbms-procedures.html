@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DBMS Impl 2: Triggers & Stored Procedures | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">DBMS Engine</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html">Admin Dashboard</a>
+      <a href="interval-detection.html">DSA Interval</a>
+      <a href="greedy-allocation.html">DSA Greedy</a>
+      <a href="dbms-transaction.html">DBMS Transactions</a>
+      <a href="dbms-procedures.html" class="active">DBMS Stored Procs</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <div class="badge badge-danger" style="margin-bottom: 0.35rem;">Engine 5 – DBMS • Implementation 2</div>
+        <h1 class="page-title">MySQL Stored Procedures & Automated Database Triggers</h1>
+        <p class="page-subtitle">Demonstrates atomic database logic execution (CALL sp_update_application_status) and automated trigger-generated notifications (trg_application_status_notification).</p>
+      </div>
+      <div>
+        <a href="../../index.html" class="btn btn-outline">← Back to Portal</a>
+      </div>
+    </div>
+
+    <!-- Architectural Workflow Diagram Card -->
+    <div class="card" style="background: #f8fafc; border-left: 4px solid var(--primary); padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1rem; color: var(--primary); margin-bottom: 0.35rem;">🔄 Automated Database Trigger Architecture:</h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">
+        1. User invokes backend API ➔ 2. Backend executes MySQL Stored Procedure <code>sp_update_application_status</code> ➔ 
+        3. Procedure updates record in <code>Applications</code> table ➔ 
+        4. MySQL database engine automatically fires <code>AFTER UPDATE</code> trigger <code>trg_application_status_notification</code> ➔ 
+        5. Trigger executes internal join query and inserts a persistent alert into <code>Notifications</code> table without application-layer code!
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <!-- Input Controls -->
+      <div class="card">
+        <div class="card-title">Stored Procedure Execution Form</div>
+
+        <form id="proc-demo-form">
+          <div class="form-group">
+            <label class="form-label">Application Record to Mutate:</label>
+            <select class="form-control" id="app-select">
+              <option value="1">Application #1: Aarav Sharma (Google SDE Drive) - Currently: Shortlisted</option>
+              <option value="2">Application #2: Diya Patel (Google SDE Drive) - Currently: Applied</option>
+              <option value="3">Application #3: Aarav Sharma (Microsoft Cloud) - Currently: Applied</option>
+              <option value="4">Application #4: Rohan Verma (Microsoft Cloud) - Currently: Shortlisted</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Target New Status (To pass to Stored Procedure):</label>
+            <select class="form-control" id="status-select">
+              <option value="shortlisted">shortlisted (Advance Candidate to Interview Round)</option>
+              <option value="selected">selected (Final Offer Conferred)</option>
+              <option value="rejected">rejected (Candidate Eliminated)</option>
+              <option value="in_progress">in_progress (Under Technical Review)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Evaluation Remarks (Passed as Stored Proc Parameter):</label>
+            <input type="text" class="form-control" id="proc-remarks" value="Evaluated by HR Panel - Criteria Satisfied" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;" id="btn-call-sp">
+            ⚙️ Execute MySQL Stored Procedure
+          </button>
+        </form>
+
+        <div class="info-callout" style="margin-top: 1.5rem;">
+          <strong>SQL Source References:</strong><br>
+          • Procedure: <code>backend/database/stored_procedure.sql</code><br>
+          • Trigger: <code>backend/database/trigger.sql</code>
+        </div>
+      </div>
+
+      <!-- Execution Output Display -->
+      <div class="card">
+        <div class="card-title">Database Engine Output & Trigger Notification</div>
+
+        <div id="proc-placeholder" style="color: var(--text-muted); text-align: center; padding: 3rem 1rem;">
+          Click "Execute MySQL Stored Procedure" to trigger automated database updates.
+        </div>
+
+        <div id="proc-output-content" style="display: none;">
+          <!-- Stored Procedure Result Box -->
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <div style="font-size: 0.75rem; color: #166534; font-weight: 700; text-transform: uppercase;">Stored Procedure Output (sp_update_application_status)</div>
+            <div id="sp-output-message" style="font-weight: 800; font-size: 1.05rem; color: #15803d; margin: 0.35rem 0;">--</div>
+            <div style="font-size: 0.8rem; color: #166534;" id="sp-rows-affected">Rows Affected: 1</div>
+          </div>
+
+          <!-- Updated Application Record -->
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">Mutated Database Record (Applications Table)</h4>
+          <div style="background: #f8fafc; border: 1px solid var(--border); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.8rem; margin-bottom: 1rem;" id="app-record-box"></div>
+
+          <!-- Trigger Generated Notification Card -->
+          <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">Automated MySQL Trigger Output (Notifications Table)</h4>
+          <div style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 1rem; border-radius: 6px;" id="trigger-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <span class="badge badge-accent" id="trigger-badge">Trigger: trg_application_status_notification</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);" id="trigger-time"></span>
+            </div>
+            <div id="trigger-title" style="font-weight: 700; color: #1e40af; font-size: 0.95rem;">--</div>
+            <p id="trigger-msg" style="font-size: 0.85rem; color: #1e3a8a; margin-top: 0.25rem;"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    document.getElementById('proc-demo-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const applicationId = document.getElementById('app-select').value;
+      const newStatus = document.getElementById('status-select').value;
+      const remarks = document.getElementById('proc-remarks').value;
+
+      try {
+        const res = await fetch('/api/dbms/execute-procedure', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ applicationId, newStatus, remarks })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+
+        document.getElementById('proc-placeholder').style.display = 'none';
+        document.getElementById('proc-output-content').style.display = 'block';
+
+        // Procedure Message
+        document.getElementById('sp-output-message').innerText = json.storedProcedure.message || 'Procedure executed successfully.';
+        document.getElementById('sp-rows-affected').innerText = `Rows Affected: ${json.storedProcedure.rowsAffected || 1}`;
+
+        // Application Record
+        document.getElementById('app-record-box').innerText = JSON.stringify(json.updatedApplication, null, 2);
+
+        // Trigger Notification
+        if (json.triggerGeneratedNotification) {
+          document.getElementById('trigger-title').innerText = json.triggerGeneratedNotification.title;
+          document.getElementById('trigger-msg').innerText = json.triggerGeneratedNotification.message;
+          document.getElementById('trigger-time').innerText = new Date(json.triggerGeneratedNotification.created_at).toLocaleTimeString();
+        }
+
+      } catch (err) {
+        alert('Stored procedure execution error: ' + err.message);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('proc-demo-form').dispatchEvent(new Event('submit'));
+    });
+  </script>
+</body>
+</html>

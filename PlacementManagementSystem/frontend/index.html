@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Placement Drive & Candidate Approval Management System</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      🎓 PlacementMS
+      <span class="badge-theme">Conflict Resource Allocation</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html" class="active">Home</a>
+      <a href="pages/admin/dashboard.html">Admin</a>
+      <a href="pages/student/dashboard.html">Student</a>
+      <a href="pages/hr/dashboard.html">HR / Company</a>
+      <a href="pages/interviewer/dashboard.html">Interviewer</a>
+      <a href="#engines-section" class="btn btn-accent" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">Academic Engines Lab</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Hero Banner -->
+    <div class="card" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; padding: 2.5rem; border: none; margin-top: 1rem;">
+      <h1 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.75rem;">Placement Drive & Candidate Approval Management System</h1>
+      <p style="font-size: 1.1rem; opacity: 0.95; max-width: 850px; margin-bottom: 1.5rem;">
+        A specialized enterprise recruitment automation system engineered around <strong>Conflict Resource Allocation</strong>. 
+        Eliminating spatial and interviewer contention across concurrent campus drives through five integrated academic subject engines.
+      </p>
+      <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+        <a href="#engines-section" class="btn btn-accent" style="background: #f59e0b; color: #78350f; font-weight: 700;">Explore 5 Academic Engines</a>
+        <a href="pages/admin/dashboard.html" class="btn btn-outline" style="background: rgba(255,255,255,0.15); color: white; border-color: rgba(255,255,255,0.3);">Open Admin Master Console</a>
+        <span id="backend-status" class="badge" style="background: rgba(255,255,255,0.2); color: white;">Connecting to Backend...</span>
+      </div>
+    </div>
+
+    <!-- 4 User Roles Section -->
+    <section style="margin-bottom: 2.5rem;">
+      <div class="page-header" style="border: none; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+        <div>
+          <h2 class="page-title" style="font-size: 1.4rem;">Role-Based System Access</h2>
+          <p class="page-subtitle">Select a portal to experience the workflow from different stakeholder perspectives:</p>
+        </div>
+      </div>
+
+      <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+        <div class="card" style="margin-bottom: 0;">
+          <h3 style="color: var(--primary); font-size: 1.1rem; margin-bottom: 0.5rem;">👑 Admin</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Manage companies, drives, rooms, master timetables, and conflict mitigation.</p>
+          <a href="pages/admin/dashboard.html" class="btn btn-primary" style="width: 100%;">Enter Admin Portal</a>
+        </div>
+        <div class="card" style="margin-bottom: 0;">
+          <h3 style="color: var(--success); font-size: 1.1rem; margin-bottom: 0.5rem;">👨‍🎓 Student</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">View eligible drives, submit applications, and track interview venue timetables.</p>
+          <a href="pages/student/dashboard.html" class="btn btn-success" style="width: 100%;">Enter Student Portal</a>
+        </div>
+        <div class="card" style="margin-bottom: 0;">
+          <h3 style="color: var(--accent); font-size: 1.1rem; margin-bottom: 0.5rem;">🏢 HR / Company</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Review applicants, evaluate resumes, and shortlist or reject candidates.</p>
+          <a href="pages/hr/dashboard.html" class="btn btn-accent" style="width: 100%;">Enter HR Portal</a>
+        </div>
+        <div class="card" style="margin-bottom: 0;">
+          <h3 style="color: var(--warning); font-size: 1.1rem; margin-bottom: 0.5rem;">📋 Interviewer</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Access assigned cabins, score candidate rubrics, and record final decisions.</p>
+          <a href="pages/interviewer/dashboard.html" class="btn btn-outline" style="width: 100%; border-color: var(--warning); color: var(--warning);">Enter Interviewer Desk</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Academic Engine Lab Section -->
+    <section id="engines-section" style="margin-bottom: 3rem;">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Academic Engine Laboratory</h2>
+          <p class="page-subtitle">Interactive demonstrations of the 5 academic subjects, featuring exactly two verified implementations each:</p>
+        </div>
+      </div>
+
+      <div class="grid-5">
+        <!-- Engine 1: OSPP -->
+        <div class="card engine-card">
+          <div class="badge badge-info" style="margin-bottom: 0.5rem;">Engine 1</div>
+          <h3>OSPP</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Operating Systems Principles & Concurrency</p>
+          <ul>
+            <li><a href="pages/admin/ospp-fcfs.html">▶ Impl 1: FCFS Scheduling</a></li>
+            <li><a href="pages/admin/ospp-priority.html">▶ Impl 2: Priority Scheduling</a></li>
+          </ul>
+        </div>
+
+        <!-- Engine 2: DSA -->
+        <div class="card engine-card">
+          <div class="badge badge-accent" style="margin-bottom: 0.5rem; background: var(--accent-light); color: var(--accent);">Engine 2</div>
+          <h3>DSA</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Data Structures & Algorithms</p>
+          <ul>
+            <li><a href="pages/admin/interval-detection.html">▶ Impl 1: Interval Overlap Detection</a></li>
+            <li><a href="pages/admin/greedy-allocation.html">▶ Impl 2: Greedy Room Allocation</a></li>
+          </ul>
+        </div>
+
+        <!-- Engine 3: Web Tech -->
+        <div class="card engine-card">
+          <div class="badge badge-success" style="margin-bottom: 0.5rem;">Engine 3</div>
+          <h3>Web Tech</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Frontend & API Engineering</p>
+          <ul>
+            <li><a href="pages/admin/web-form-validation.html">▶ Impl 1: Form Validation Demo</a></li>
+            <li><a href="pages/admin/web-rbac.html">▶ Impl 2: Role-Based Access Control</a></li>
+          </ul>
+        </div>
+
+        <!-- Engine 4: Software Eng -->
+        <div class="card engine-card">
+          <div class="badge badge-warning" style="margin-bottom: 0.5rem;">Engine 4</div>
+          <h3>Software Eng</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">Verification, RTM & Test Suites</p>
+          <ul>
+            <li><a href="pages/admin/se-traceability.html">▶ Impl 1: Requirement Traceability</a></li>
+            <li><a href="pages/admin/se-testing-dashboard.html">▶ Impl 2: Testing Dashboard</a></li>
+          </ul>
+        </div>
+
+        <!-- Engine 5: DBMS -->
+        <div class="card engine-card">
+          <div class="badge badge-danger" style="margin-bottom: 0.5rem;">Engine 5</div>
+          <h3>DBMS</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">MySQL 8.x Transactions & Triggers</p>
+          <ul>
+            <li><a href="pages/admin/dbms-transaction.html">▶ Impl 1: Transactions & Rollback</a></li>
+            <li><a href="pages/admin/dbms-procedures.html">▶ Impl 2: Triggers & Stored Procs</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026 | Built with Vanilla HTML5, CSS3, JS, Node.js & MySQL</p>
+  </footer>
+
+  <script>
+    // Ping backend overview on load
+    fetch('/api/placement/overview')
+      .then(res => res.json())
+      .then(data => {
+        const badge = document.getElementById('backend-status');
+        if (data.success) {
+          badge.innerHTML = `● ${data.database.mode}`;
+          badge.style.background = data.database.connected ? '#10b981' : '#f59e0b';
+        }
+      })
+      .catch(() => {
+        const badge = document.getElementById('backend-status');
+        badge.innerHTML = '○ Backend Offline (Static Mode)';
+        badge.style.background = '#64748b';
+      });
+  </script>
+</body>
+</html>

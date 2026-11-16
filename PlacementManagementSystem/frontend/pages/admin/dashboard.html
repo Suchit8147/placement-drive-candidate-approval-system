@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Master Console | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <!-- Top Navbar -->
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">
+      🎓 PlacementMS <span class="badge-theme">Admin Portal</span>
+    </a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html" class="active">Admin Console</a>
+      <a href="../student/dashboard.html">Student Portal</a>
+      <a href="../hr/dashboard.html">HR Portal</a>
+      <a href="../interviewer/dashboard.html">Interviewer Desk</a>
+      <a href="../../index.html#engines-section" class="btn btn-accent" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">Engines Lab</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Placement Cell Administrative Console</h1>
+        <p class="page-subtitle">Full-lifecycle management for students, companies, placement drives, applications, conflict-free scheduling, rooms, results, and notifications.</p>
+      </div>
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <span id="db-indicator" class="badge badge-info" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;">Database: Connecting...</span>
+        <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="reconnectDB()">🔄 Check DB</button>
+      </div>
+    </div>
+
+    <!-- Management Navigation Tabs -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview & Engines</button>
+      <button class="tab-btn" onclick="switchTab('students')">👨‍🎓 Students (<span id="tab-cnt-students">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('companies')">🏢 Companies (<span id="tab-cnt-companies">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('drives')">🚀 Placement Drives (<span id="tab-cnt-drives">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('applications')">📝 Applications (<span id="tab-cnt-apps">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('interviews')">📅 Interviews & Rounds</button>
+      <button class="tab-btn" onclick="switchTab('rooms')">🏛️ Rooms & Venues</button>
+      <button class="tab-btn" onclick="switchTab('results')">🏆 Results (<span id="tab-cnt-results">0</span>)</button>
+      <button class="tab-btn" onclick="switchTab('notifications')">🔔 Notifications (<span id="tab-cnt-notifs">0</span>)</button>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 1: OVERVIEW & ACADEMIC ENGINES                            -->
+    <!-- ============================================================= -->
+    <div id="tab-overview" class="tab-pane active">
+      <!-- Stats KPI Grid -->
+      <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Active Drives</span>
+          <div id="stat-drives" style="font-size: 2rem; font-weight: 800; color: var(--primary);">0</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Total Applicants</span>
+          <div id="stat-apps" style="font-size: 2rem; font-weight: 800; color: var(--info);">0</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Provisioned Rooms</span>
+          <div id="stat-rooms" style="font-size: 2rem; font-weight: 800; color: var(--success);">0</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Scheduled Slots</span>
+          <div id="stat-slots" style="font-size: 2rem; font-weight: 800; color: var(--accent);">0</div>
+        </div>
+      </div>
+
+      <!-- Secondary Stats KPI Grid -->
+      <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+        <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center; background: #fafafa;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Registered Students</span>
+          <div id="stat-students" style="font-size: 1.5rem; font-weight: 800; color: #334155;">0</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center; background: #fafafa;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Partner Companies</span>
+          <div id="stat-companies" style="font-size: 1.5rem; font-weight: 800; color: #334155;">0</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center; background: #fafafa;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Results Declared</span>
+          <div id="stat-results" style="font-size: 1.5rem; font-weight: 800; color: var(--success);">0</div>
+        </div>
+        <div class="card" style="margin-bottom: 0; padding: 1rem; text-align: center; background: #fafafa;">
+          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Unread Notifications</span>
+          <div id="stat-notifs" style="font-size: 1.5rem; font-weight: 800; color: var(--warning);">0</div>
+        </div>
+      </div>
+
+      <!-- Academic Engines Launchpad -->
+      <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-title">
+          <span>Academic Engines Direct Launchpad (10 Working Implementations)</span>
+          <a href="interval-detection.html" class="btn btn-primary" style="font-size: 0.8rem; padding: 0.3rem 0.7rem;">🔍 Conflict Radar</a>
+        </div>
+        <div class="grid-5" style="margin-top: 0.5rem;">
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+            <strong style="font-size: 0.85rem; color: var(--info);">OSPP Engine</strong>
+            <div style="margin-top: 0.4rem; font-size: 0.8rem;">
+              <div><a href="ospp-fcfs.html" style="color: var(--accent); font-weight: 600;">▶ 1. FCFS Scheduling</a></div>
+              <div><a href="ospp-priority.html" style="color: var(--accent); font-weight: 600;">▶ 2. Priority Scheduling</a></div>
+            </div>
+          </div>
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+            <strong style="font-size: 0.85rem; color: var(--accent);">DSA Engine</strong>
+            <div style="margin-top: 0.4rem; font-size: 0.8rem;">
+              <div><a href="interval-detection.html" style="color: var(--accent); font-weight: 600;">▶ 1. Interval Overlap</a></div>
+              <div><a href="greedy-allocation.html" style="color: var(--accent); font-weight: 600;">▶ 2. Greedy Room Alloc</a></div>
+            </div>
+          </div>
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+            <strong style="font-size: 0.85rem; color: var(--success);">Web Tech Engine</strong>
+            <div style="margin-top: 0.4rem; font-size: 0.8rem;">
+              <div><a href="web-form-validation.html" style="color: var(--accent); font-weight: 600;">▶ 1. Form Validation</a></div>
+              <div><a href="web-rbac.html" style="color: var(--accent); font-weight: 600;">▶ 2. Role-Based Access</a></div>
+            </div>
+          </div>
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+            <strong style="font-size: 0.85rem; color: var(--warning);">Software Eng</strong>
+            <div style="margin-top: 0.4rem; font-size: 0.8rem;">
+              <div><a href="se-traceability.html" style="color: var(--accent); font-weight: 600;">▶ 1. Traceability (RTM)</a></div>
+              <div><a href="se-testing-dashboard.html" style="color: var(--accent); font-weight: 600;">▶ 2. Test Suite</a></div>
+            </div>
+          </div>
+          <div style="background: #f8fafc; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border);">
+            <strong style="font-size: 0.85rem; color: var(--danger);">DBMS Engine</strong>
+            <div style="margin-top: 0.4rem; font-size: 0.8rem;">
+              <div><a href="dbms-transaction.html" style="color: var(--accent); font-weight: 600;">▶ 1. ACID Transactions</a></div>
+              <div><a href="dbms-procedures.html" style="color: var(--accent); font-weight: 600;">▶ 2. Stored Procs & Triggers</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action Shortcuts -->
+      <div class="card">
+        <div class="card-title">Quick Administrative Actions</div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary" onclick="openAddStudentModal()">+ Add New Student</button>
+          <button type="button" class="btn btn-accent" onclick="openAddCompanyModal()">+ Add New Company</button>
+          <button type="button" class="btn btn-success" onclick="openAddDriveModal()">+ Create Placement Drive</button>
+          <button type="button" class="btn btn-outline" onclick="openAddRoomModal()">+ Add Room / Cabin</button>
+          <button type="button" class="btn btn-outline" onclick="openAddInterviewerModal()">+ Add Interviewer</button>
+          <button type="button" class="btn btn-outline" onclick="openScheduleModal()">+ Schedule Interview</button>
+          <button type="button" class="btn btn-outline" onclick="openResultModal()">+ Declare Result</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 2: STUDENT MANAGEMENT                                     -->
+    <!-- ============================================================= -->
+    <div id="tab-students" class="tab-pane">
+      <div class="card">
+        <div class="action-bar">
+          <div>
+            <h2 style="font-size: 1.2rem; color: var(--primary);">Student Profiles & Eligibility</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Manage registered candidates, academic CGPAs, and verified profiles.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openAddStudentModal()">+ Add Student</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>USN</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>CGPA</th>
+                <th>Batch</th>
+                <th>Resume</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="students-tbody">
+              <tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Loading students...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 3: COMPANY MANAGEMENT                                     -->
+    <!-- ============================================================= -->
+    <div id="tab-companies" class="tab-pane">
+      <div class="card">
+        <div class="action-bar">
+          <div>
+            <h2 style="font-size: 1.2rem; color: var(--primary);">Recruiting Companies & Corporate Partners</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Manage corporate HR accounts, industrial domains, and recruiter contacts.</p>
+          </div>
+          <button type="button" class="btn btn-accent" onclick="openAddCompanyModal()">+ Add Company</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Company Name</th>
+                <th>Industry</th>
+                <th>Website</th>
+                <th>Contact Person</th>
+                <th>Contact Email</th>
+                <th>Drives</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="companies-tbody">
+              <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading companies...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 4: PLACEMENT DRIVE MANAGEMENT                             -->
+    <!-- ============================================================= -->
+    <div id="tab-drives" class="tab-pane">
+      <div class="card">
+        <div class="action-bar">
+          <div>
+            <h2 style="font-size: 1.2rem; color: var(--primary);">Placement Drives & Recruitment Campaigns</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Configure package (CTC), minimum CGPA cutoffs, and eligible disciplines.</p>
+          </div>
+          <button type="button" class="btn btn-success" onclick="openAddDriveModal()">+ Create Placement Drive</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>Drive Title</th>
+                <th>Company</th>
+                <th>Job Role</th>
+                <th>Package (CTC)</th>
+                <th>Min CGPA</th>
+                <th>Eligible Branches</th>
+                <th>Drive Date</th>
+                <th>Status</th>
+                <th>Applicants</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="drives-tbody">
+              <tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Loading drives...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 5: APPLICATION MANAGEMENT                                 -->
+    <!-- ============================================================= -->
+    <div id="tab-applications" class="tab-pane">
+      <div class="card">
+        <div class="action-bar">
+          <div>
+            <h2 style="font-size: 1.2rem; color: var(--primary);">Student Applications & Screening Console</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Review candidate applications, shortlist profiles, and advance candidates across rounds.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem;">
+            <select id="filter-app-status" class="form-control" style="font-size: 0.8rem; padding: 0.3rem 0.6rem;" onchange="loadApplications()">
+              <option value="">All Statuses</option>
+              <option value="applied">Applied</option>
+              <option value="shortlisted">Shortlisted</option>
+              <option value="in_progress">In Progress</option>
+              <option value="selected">Selected</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <button type="button" class="btn btn-outline" style="font-size: 0.8rem;" onclick="loadApplications()">🔄 Refresh</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>App #</th>
+                <th>Student</th>
+                <th>USN</th>
+                <th>Dept</th>
+                <th>CGPA</th>
+                <th>Drive</th>
+                <th>Company</th>
+                <th>Current Round</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applications-tbody">
+              <tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Loading applications...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 6: INTERVIEW & SCHEDULE MANAGEMENT                       -->
+    <!-- ============================================================= -->
+    <div id="tab-interviews" class="tab-pane">
+      <!-- Schedules Grid -->
+      <div class="card">
+        <div class="action-bar">
+          <div>
+            <h2 style="font-size: 1.2rem; color: var(--primary);">Confirmed Interview Timetable & Conflict Radar</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Conflict-free interview allocations enforced via algebraic interval overlap checking.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openScheduleModal()">+ Create Interview Schedule</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Candidate</th>
+                <th>USN</th>
+                <th>Drive</th>
+                <th>Round</th>
+                <th>Venue / Room</th>
+                <th>Interviewer</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="schedules-tbody">
+              <tr><td colspan="11" style="text-align: center; color: var(--text-muted);">Loading schedules...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Two sub-cards: Interviewers & Interview Rounds -->
+      <div class="grid-2">
+        <!-- Interviewers -->
+        <div class="card">
+          <div class="action-bar">
+            <h3 style="font-size: 1.05rem; color: var(--primary);">Technical Interviewers</h3>
+            <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.25rem 0.6rem;" onclick="openAddInterviewerModal()">+ Add Panelist</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table" style="font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Name</th>
+                  <th>Dept</th>
+                  <th>Designation</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="interviewers-tbody">
+                <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading interviewers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Rounds -->
+        <div class="card">
+          <div class="action-bar">
+            <h3 style="font-size: 1.05rem; color: var(--primary);">Interview Rounds Catalog</h3>
+            <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.25rem 0.6rem;" onclick="openAddRoundModal()">+ Add Round</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table" style="font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Drive</th>
+                  <th>#</th>
+                  <th>Round Name</th>
+                  <th>Type</th>
+                  <th>Pass Score</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rounds-tbody">
+                <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading rounds...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 7: ROOM MANAGEMENT & AVAILABILITY                         -->
+    <!-- ============================================================= -->
+    <div id="tab-rooms" class="tab-pane">
+      <div class="grid-2">
+        <!-- Room Inventory -->
+        <div class="card">
+          <div class="action-bar">
+            <div>
+              <h2 style="font-size: 1.15rem; color: var(--primary);">Physical Venues & Rooms</h2>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Spatial resources subject to exclusive lock reservation.</p>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="openAddRoomModal()">+ Add Room</button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table" style="font-size: 0.85rem;">
+              <thead>
+                <tr>
+                  <th>Room</th>
+                  <th>Building</th>
+                  <th>Floor</th>
+                  <th>Capacity</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="rooms-tbody">
+                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading rooms...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Room Availability Checker Tool -->
+        <div class="card" style="background: #fdfefe; border-top: 4px solid var(--accent);">
+          <div class="card-title">🔍 Real-Time Spatial Availability Checker</div>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Test whether a specific room is available for a designated contiguous interview window without collisions:
+          </p>
+
+          <form id="check-room-form" onsubmit="handleCheckRoomAvailability(event)">
+            <div class="form-group">
+              <label class="form-label">Select Room / Venue:</label>
+              <select id="check-room-id" class="form-control" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Start Time Window:</label>
+                <input type="datetime-local" id="check-start-time" class="form-control" required value="2026-11-20T10:00">
+              </div>
+              <div class="form-group">
+                <label class="form-label">End Time Window:</label>
+                <input type="datetime-local" id="check-end-time" class="form-control" required value="2026-11-20T11:00">
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-accent" style="width: 100%;">
+              ⚡ Execute Availability Check
+            </button>
+          </form>
+
+          <div id="check-result-box" style="margin-top: 1rem; display: none;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 8: RESULTS MANAGEMENT                                     -->
+    <!-- ============================================================= -->
+    <div id="tab-results" class="tab-pane">
+      <div class="card">
+        <div class="action-bar">
+          <div>
+            <h2 style="font-size: 1.2rem; color: var(--primary);">Final Interview Results & Candidate Offers</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Declared decisions, cumulative scores, and official committee remarks.</p>
+          </div>
+          <button type="button" class="btn btn-success" onclick="openResultModal()">+ Record New Result</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Candidate Name</th>
+                <th>USN</th>
+                <th>Department</th>
+                <th>Placement Drive</th>
+                <th>Company</th>
+                <th>Total Score</th>
+                <th>Decision</th>
+                <th>Remarks</th>
+                <th>Declared Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="results-tbody">
+              <tr><td colspan="11" style="text-align: center; color: var(--text-muted);">Loading results...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================= -->
+    <!-- TAB 9: NOTIFICATIONS MANAGEMENT                               -->
+    <!-- ============================================================= -->
+    <div id="tab-notifications" class="tab-pane">
+      <div class="card">
+        <div class="action-bar">
+          <div>
+            <h2 style="font-size: 1.2rem; color: var(--primary);">System Notifications & Alerts Dispatcher</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">View automated database trigger notifications and broadcast targeted announcements.</p>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openSendNotificationModal()">+ Dispatch Notification</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.85rem;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Recipient User</th>
+                <th>Role</th>
+                <th>Title</th>
+                <th>Message Content</th>
+                <th>Status</th>
+                <th>Sent At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="notifications-tbody">
+              <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading notifications...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: ADD / EDIT STUDENT                                     -->
+  <!-- ============================================================= -->
+  <div id="student-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="student-modal-title">Add New Student</h3>
+        <button type="button" class="btn-close" onclick="closeModal('student-modal')">&times;</button>
+      </div>
+      <form id="student-form" onsubmit="saveStudent(event)">
+        <div class="modal-body">
+          <input type="hidden" id="student-id">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input type="text" id="student-name" class="form-control" required placeholder="e.g. Priyanshu Mehta">
+            </div>
+            <div class="form-group">
+              <label class="form-label">USN (University Seat Number) *</label>
+              <input type="text" id="student-usn" class="form-control" required placeholder="e.g. 1MS21CS085">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Email Address *</label>
+              <input type="email" id="student-email" class="form-control" required placeholder="student@college.edu">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="text" id="student-phone" class="form-control" placeholder="9876543210">
+            </div>
+          </div>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Department *</label>
+              <select id="student-dept" class="form-control" required>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Information Science">Information Science</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Mechanical">Mechanical</option>
+                <option value="Civil">Civil</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">CGPA (0.00 – 10.00) *</label>
+              <input type="number" step="0.01" min="0" max="10" id="student-cgpa" class="form-control" required placeholder="8.50">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Graduation Year *</label>
+              <input type="number" id="student-grad-year" class="form-control" required value="2026">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Resume URL (Drive Link)</label>
+            <input type="url" id="student-resume" class="form-control" placeholder="https://drive.google.com/resume.pdf">
+          </div>
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+              <input type="checkbox" id="student-eligible" checked>
+              <strong>Eligible for Placement Drives</strong>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('student-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="student-submit-btn">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: ADD / EDIT COMPANY                                     -->
+  <!-- ============================================================= -->
+  <div id="company-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="company-modal-title">Add Recruiting Company</h3>
+        <button type="button" class="btn-close" onclick="closeModal('company-modal')">&times;</button>
+      </div>
+      <form id="company-form" onsubmit="saveCompany(event)">
+        <div class="modal-body">
+          <input type="hidden" id="company-id">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Company Name *</label>
+              <input type="text" id="company-name" class="form-control" required placeholder="e.g. Cisco Systems">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Industry Domain *</label>
+              <input type="text" id="company-industry" class="form-control" required placeholder="e.g. Networking & Security">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Careers / Website URL</label>
+            <input type="url" id="company-website" class="form-control" placeholder="https://jobs.cisco.com">
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Contact Person / Lead HR *</label>
+              <input type="text" id="company-contact-person" class="form-control" required placeholder="e.g. Meenakshi S.">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Email (HR Account) *</label>
+              <input type="email" id="company-contact-email" class="form-control" required placeholder="hr@company.com">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('company-modal')">Cancel</button>
+          <button type="submit" class="btn btn-accent" id="company-submit-btn">Save Company</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: ADD / EDIT PLACEMENT DRIVE                             -->
+  <!-- ============================================================= -->
+  <div id="drive-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="drive-modal-title">Create Placement Drive</h3>
+        <button type="button" class="btn-close" onclick="closeModal('drive-modal')">&times;</button>
+      </div>
+      <form id="drive-form" onsubmit="saveDrive(event)">
+        <div class="modal-body">
+          <input type="hidden" id="drive-id">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Company *</label>
+              <select id="drive-company-id" class="form-control" required>
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Drive Title *</label>
+              <input type="text" id="drive-title" class="form-control" required placeholder="e.g. Cisco Campus Drive 2026">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Job Role *</label>
+              <input type="text" id="drive-role" class="form-control" required placeholder="Software Engineer">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Compensation (CTC in LPA) *</label>
+              <input type="number" step="0.1" min="0" id="drive-ctc" class="form-control" required placeholder="24.00">
+            </div>
+          </div>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Minimum CGPA Cutoff *</label>
+              <input type="number" step="0.01" min="0" max="10" id="drive-min-cgpa" class="form-control" required value="7.50">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Eligible Branches</label>
+              <input type="text" id="drive-branches" class="form-control" value="All" placeholder="All or CS, IS, EC">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="drive-status" class="form-control">
+                <option value="active">Active</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Drive Date *</label>
+            <input type="date" id="drive-date" class="form-control" required value="2026-11-25">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('drive-modal')">Cancel</button>
+          <button type="submit" class="btn btn-success" id="drive-submit-btn">Save Drive</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: ADD / EDIT ROOM                                        -->
+  <!-- ============================================================= -->
+  <div id="room-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="room-modal-title">Add Physical Room / Venue</h3>
+        <button type="button" class="btn-close" onclick="closeModal('room-modal')">&times;</button>
+      </div>
+      <form id="room-form" onsubmit="saveRoom(event)">
+        <div class="modal-body">
+          <input type="hidden" id="room-id">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Room Identifier / Code *</label>
+              <input type="text" id="room-number" class="form-control" required placeholder="e.g. Room-203">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Building Name *</label>
+              <input type="text" id="room-building" class="form-control" required placeholder="Placement Block">
+            </div>
+          </div>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Floor Number *</label>
+              <input type="number" id="room-floor" class="form-control" required value="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Capacity (pax) *</label>
+              <input type="number" id="room-capacity" class="form-control" required value="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Room Type *</label>
+              <select id="room-type" class="form-control" required>
+                <option value="cabin">Cabin</option>
+                <option value="lab">Lab</option>
+                <option value="hall">Hall</option>
+                <option value="auditorium">Auditorium</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+              <input type="checkbox" id="room-active" checked>
+              <strong>Active (Available for Interview Scheduling)</strong>
+            </label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('room-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="room-submit-btn">Save Room</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: ADD / EDIT INTERVIEWER                                 -->
+  <!-- ============================================================= -->
+  <div id="interviewer-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="interviewer-modal-title">Register Technical Interviewer</h3>
+        <button type="button" class="btn-close" onclick="closeModal('interviewer-modal')">&times;</button>
+      </div>
+      <form id="interviewer-form" onsubmit="saveInterviewer(event)">
+        <div class="modal-body">
+          <input type="hidden" id="interviewer-id">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Panelist Full Name *</label>
+              <input type="text" id="interviewer-name" class="form-control" required placeholder="Dr. S. K. Narayan">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Employee Code *</label>
+              <input type="text" id="interviewer-code" class="form-control" required placeholder="EMP-CS-12">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Official Email *</label>
+              <input type="email" id="interviewer-email" class="form-control" required placeholder="narayan@college.edu">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Department *</label>
+              <input type="text" id="interviewer-dept" class="form-control" required value="Computer Science">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Designation *</label>
+              <input type="text" id="interviewer-designation" class="form-control" required value="Associate Professor">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Specialization</label>
+              <input type="text" id="interviewer-spec" class="form-control" placeholder="Cloud Computing, OS, DSA">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('interviewer-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="interviewer-submit-btn">Save Interviewer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: ADD INTERVIEW ROUND                                    -->
+  <!-- ============================================================= -->
+  <div id="round-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="round-modal-title">Configure Interview Round</h3>
+        <button type="button" class="btn-close" onclick="closeModal('round-modal')">&times;</button>
+      </div>
+      <form id="round-form" onsubmit="saveRound(event)">
+        <div class="modal-body">
+          <input type="hidden" id="round-id">
+          <div class="form-group">
+            <label class="form-label">Placement Drive *</label>
+            <select id="round-drive-id" class="form-control" required>
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Round Number *</label>
+              <input type="number" id="round-num" class="form-control" required min="1" value="1">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Round Name *</label>
+              <input type="text" id="round-name" class="form-control" required placeholder="Technical Interview - DSA">
+            </div>
+          </div>
+          <div class="grid-3">
+            <div class="form-group">
+              <label class="form-label">Round Type *</label>
+              <select id="round-type" class="form-control" required>
+                <option value="technical">Technical</option>
+                <option value="online_test">Online Test</option>
+                <option value="gd">Group Discussion</option>
+                <option value="hr">HR Round</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pass Score (0-100)</label>
+              <input type="number" id="round-pass-score" class="form-control" required value="70">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Duration (Minutes)</label>
+              <input type="number" id="round-duration" class="form-control" required value="45">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('round-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Round</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: CREATE INTERVIEW SCHEDULE                              -->
+  <!-- ============================================================= -->
+  <div id="schedule-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="schedule-modal-title">Schedule Conflict-Free Interview</h3>
+        <button type="button" class="btn-close" onclick="closeModal('schedule-modal')">&times;</button>
+      </div>
+      <form id="schedule-form" onsubmit="saveSchedule(event)">
+        <div class="modal-body">
+          <input type="hidden" id="schedule-id">
+          <div class="form-group">
+            <label class="form-label">Candidate Application *</label>
+            <select id="sched-app-id" class="form-control" required onchange="handleSchedAppChange()">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Interview Round *</label>
+              <select id="sched-round-id" class="form-control" required>
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Interviewer Panelist *</label>
+              <select id="sched-interviewer-id" class="form-control" required>
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Allocated Room / Cabin *</label>
+            <select id="sched-room-id" class="form-control" required>
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Start Time *</label>
+              <input type="datetime-local" id="sched-start-time" class="form-control" required value="2026-11-20T11:00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">End Time *</label>
+              <input type="datetime-local" id="sched-end-time" class="form-control" required value="2026-11-20T12:00">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Administrative Notes</label>
+            <input type="text" id="sched-notes" class="form-control" placeholder="Round 2 Technical Interview">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('schedule-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="schedule-submit-btn">⚡ Commit Schedule</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: ADD / EDIT RESULT                                      -->
+  <!-- ============================================================= -->
+  <div id="result-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="result-modal-title">Record Candidate Result & Decision</h3>
+        <button type="button" class="btn-close" onclick="closeModal('result-modal')">&times;</button>
+      </div>
+      <form id="result-form" onsubmit="saveResult(event)">
+        <div class="modal-body">
+          <input type="hidden" id="result-id">
+          <div class="form-group" id="result-app-group">
+            <label class="form-label">Candidate Application *</label>
+            <select id="result-app-id" class="form-control" required>
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Total Score (0 – 100) *</label>
+              <input type="number" step="0.5" min="0" max="100" id="result-score" class="form-control" required value="85">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Final Decision *</label>
+              <select id="result-decision" class="form-control" required>
+                <option value="selected">🎉 Selected (Offer Extended)</option>
+                <option value="rejected">✕ Rejected</option>
+                <option value="on_hold">⏸ On-Hold (Waitlisted)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Committee Remarks & Feedback</label>
+            <textarea id="result-remarks" class="form-control" rows="3" placeholder="Solid proficiency in DSA, concurrency algorithms, and communication."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('result-modal')">Cancel</button>
+          <button type="submit" class="btn btn-success">Save Result</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: SEND NOTIFICATION                                      -->
+  <!-- ============================================================= -->
+  <div id="notif-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Dispatch System Notification</h3>
+        <button type="button" class="btn-close" onclick="closeModal('notif-modal')">&times;</button>
+      </div>
+      <form id="notif-form" onsubmit="saveNotification(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Target Recipient User *</label>
+            <select id="notif-user-id" class="form-control" required>
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notification Title *</label>
+            <input type="text" id="notif-title" class="form-control" required placeholder="Important Placement Update">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notification Message *</label>
+            <textarea id="notif-message" class="form-control" rows="3" required placeholder="Please review your interview timetable and venue instructions."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('notif-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Dispatch Alert</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026 | Powered by MySQL 8.x & Node.js</p>
+  </footer>
+
+  <!-- Admin Script Logic -->
+  <script src="../../js/admin.js"></script>
+</body>
+</html>

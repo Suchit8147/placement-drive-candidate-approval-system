@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Corporate Recruiter & HR Desk | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <!-- Top Navbar -->
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">
+      🎓 PlacementMS <span class="badge-theme">HR Portal</span>
+    </a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="../admin/dashboard.html">Admin</a>
+      <a href="../student/dashboard.html">Student</a>
+      <a href="dashboard.html" class="active">HR Portal</a>
+      <a href="../interviewer/dashboard.html">Interviewer</a>
+      <a href="../../index.html#engines-section" class="btn btn-accent" style="padding: 0.3rem 0.8rem; font-size: 0.85rem;">Engines Lab</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <!-- Header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Corporate Recruiter & Talent Acquisition Desk</h1>
+        <p class="page-subtitle">Manage company drives, screen applicants, review candidate resumes, and shortlist profiles with automated notification triggers.</p>
+      </div>
+      <!-- Company Switcher -->
+      <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <label for="company-selector" style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted);">Active Company:</label>
+        <select id="company-selector" class="form-control" style="font-size: 0.85rem; width: auto;" onchange="changeActiveCompany()">
+          <!-- Populated dynamically -->
+        </select>
+        <button type="button" class="btn btn-outline" style="font-size: 0.8rem; padding: 0.35rem 0.75rem;" onclick="loadHRData()">🔄 Refresh</button>
+      </div>
+    </div>
+
+    <!-- Company Profile Card -->
+    <div class="card" style="margin-bottom: 1.5rem; background: #fdfbf7; border-left: 5px solid #f59e0b;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <h2 id="comp-name" style="font-size: 1.35rem; color: #b45309;">🏢 Loading Company...</h2>
+            <span id="comp-industry" class="badge badge-accent">-</span>
+          </div>
+          <p id="comp-contact" style="font-size: 0.9rem; color: var(--text-muted); margin: 0.3rem 0;">
+            Lead HR / Contact: <strong id="comp-person">-</strong> | Email: <strong id="comp-email">-</strong>
+          </p>
+          <div style="font-size: 0.85rem; color: #92400e;">
+            Careers Portal: <a id="comp-website" href="#" target="_blank" style="color: var(--accent); font-weight: 600;">Visit Official Website</a>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <button type="button" class="btn btn-outline" style="font-size: 0.85rem;" onclick="openEditCompanyModal()">
+            ✏️ Edit Company Info
+          </button>
+          <button type="button" class="btn btn-success" style="font-size: 0.85rem;" onclick="openCreateDriveModal()">
+            + Post New Drive
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Drives by this Company -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <div class="card-title">
+        <span>Active Recruitment Drives for This Company</span>
+        <span class="badge badge-info" id="comp-drives-count">0 Drives</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table" style="font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th>Drive Title</th>
+              <th>Job Role</th>
+              <th>Package (CTC)</th>
+              <th>Cutoff (Min CGPA)</th>
+              <th>Target Branches</th>
+              <th>Drive Date</th>
+              <th>Status</th>
+              <th>Applicants</th>
+            </tr>
+          </thead>
+          <tbody id="hr-drives-tbody">
+            <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading company drives...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Applicant Screening & Approval Console -->
+    <div class="card">
+      <div class="action-bar">
+        <div>
+          <h2 style="font-size: 1.2rem; color: var(--primary);">Student Applicants & Shortlisting Console</h2>
+          <p style="font-size: 0.85rem; color: var(--text-muted);">Review candidate profiles, verify academic credentials, inspect resumes, and execute approval workflows.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <select id="filter-hr-status" class="form-control" style="font-size: 0.8rem;" onchange="loadApplicants()">
+            <option value="">All Applications</option>
+            <option value="applied">Applied (Pending Review)</option>
+            <option value="shortlisted">Shortlisted</option>
+            <option value="in_progress">In Progress</option>
+            <option value="selected">Selected</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table" style="font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th>App #</th>
+              <th>Candidate Name</th>
+              <th>USN</th>
+              <th>Department</th>
+              <th>CGPA</th>
+              <th>Drive Role</th>
+              <th>Resume</th>
+              <th>Current Stage</th>
+              <th>Status</th>
+              <th>HR Approval Actions</th>
+            </tr>
+          </thead>
+          <tbody id="hr-apps-tbody">
+            <tr><td colspan="10" style="text-align: center; color: var(--text-muted);">Loading applicants...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-callout" style="margin-top: 1.5rem;">
+        <strong>Database Trigger Integration:</strong>
+        When you click <strong>Shortlist</strong>, <strong>Select</strong>, or <strong>Reject</strong>, the action updates the <code>Applications</code> table via parameterized queries (or fires MySQL Stored Procedure <code>sp_update_application_status</code>), triggering database notifications directly to the student's portal.
+      </div>
+    </div>
+  </main>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: EDIT COMPANY INFO                                      -->
+  <!-- ============================================================= -->
+  <div id="edit-comp-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Company Information</h3>
+        <button type="button" class="btn-close" onclick="closeModal('edit-comp-modal')">&times;</button>
+      </div>
+      <form id="edit-comp-form" onsubmit="saveCompanyProfile(event)">
+        <div class="modal-body">
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Company Name *</label>
+              <input type="text" id="edit-comp-name" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Industry Domain *</label>
+              <input type="text" id="edit-comp-industry" class="form-control" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Careers / Website URL</label>
+            <input type="url" id="edit-comp-website" class="form-control">
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Contact Person *</label>
+              <input type="text" id="edit-comp-person" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Email *</label>
+              <input type="email" id="edit-comp-email" class="form-control" required>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('edit-comp-modal')">Cancel</button>
+          <button type="submit" class="btn btn-accent">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================= -->
+  <!-- MODAL: POST NEW DRIVE                                         -->
+  <!-- ============================================================= -->
+  <div id="create-drive-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Post New Placement Drive</h3>
+        <button type="button" class="btn-close" onclick="closeModal('create-drive-modal')">&times;</button>
+      </div>
+      <form id="create-drive-form" onsubmit="saveNewDrive(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Drive Title *</label>
+            <input type="text" id="new-drive-title" class="form-control" required placeholder="e.g. Graduate Software Development Drive 2026">
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Job Role *</label>
+              <input type="text" id="new-drive-role" class="form-control" required placeholder="Software Engineer">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Package (CTC in LPA) *</label>
+              <input type="number" step="0.1" min="0" id="new-drive-ctc" class="form-control" required value="20.00">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Minimum CGPA Cutoff *</label>
+              <input type="number" step="0.01" min="0" max="10" id="new-drive-cgpa" class="form-control" required value="7.50">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Eligible Branches</label>
+              <input type="text" id="new-drive-branches" class="form-control" value="All">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Drive Date *</label>
+            <input type="date" id="new-drive-date" class="form-control" required value="2026-11-30">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('create-drive-modal')">Cancel</button>
+          <button type="submit" class="btn btn-success">Publish Drive</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026 | Built with Vanilla HTML5, CSS3, JS, Node.js & MySQL</p>
+  </footer>
+
+  <script>
+    let activeCompany = null;
+    let allCompanies = [];
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    }
+
+    window.addEventListener('click', (e) => {
+      if (e.target.classList.contains('modal-backdrop')) {
+        e.target.classList.remove('active');
+      }
+    });
+
+    // 1. Initialize Portal
+    async function initHRPortal() {
+      try {
+        const res = await fetch('/api/placement/companies');
+        const json = await res.json();
+        allCompanies = json.companies || [];
+
+        const selector = document.getElementById('company-selector');
+        selector.innerHTML = '';
+        allCompanies.forEach(c => {
+          selector.innerHTML += `<option value="${c.id}">${c.company_name} (${c.industry})</option>`;
+        });
+
+        if (allCompanies.length > 0) {
+          activeCompany = allCompanies[0];
+          await loadHRData();
+        }
+      } catch (err) {
+        console.error('Failed to init HR portal:', err);
+      }
+    }
+
+    async function changeActiveCompany() {
+      const selectedId = parseInt(document.getElementById('company-selector').value, 10);
+      activeCompany = allCompanies.find(c => c.id === selectedId) || allCompanies[0];
+      await loadHRData();
+    }
+
+    // 2. Load Company Data
+    async function loadHRData() {
+      if (!activeCompany) return;
+
+      document.getElementById('comp-name').innerText = `🏢 ${activeCompany.company_name}`;
+      document.getElementById('comp-industry').innerText = activeCompany.industry;
+      document.getElementById('comp-person').innerText = activeCompany.contact_person;
+      document.getElementById('comp-email').innerText = activeCompany.contact_email;
+
+      const webLink = document.getElementById('comp-website');
+      if (activeCompany.website) {
+        webLink.href = activeCompany.website;
+        webLink.style.display = 'inline';
+      } else {
+        webLink.style.display = 'none';
+      }
+
+      await Promise.all([loadCompanyDrives(), loadApplicants()]);
+    }
+
+    // 3. Load Drives posted by this Company
+    async function loadCompanyDrives() {
+      const tbody = document.getElementById('hr-drives-tbody');
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">Loading drives...</td></tr>';
+      try {
+        const res = await fetch('/api/placement/drives');
+        const json = await res.json();
+        const drives = (json.drives || []).filter(d => d.company_id === activeCompany.id);
+        document.getElementById('comp-drives-count').innerText = `${drives.length} Drives`;
+        tbody.innerHTML = '';
+
+        if (drives.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No drives posted yet. Click "+ Post New Drive" above.</td></tr>';
+          return;
+        }
+
+        drives.forEach(d => {
+          const dateStr = d.drive_date ? new Date(d.drive_date).toLocaleDateString() : '';
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${d.title}</strong></td>
+              <td>${d.job_role}</td>
+              <td><span class="badge badge-success">${d.ctc_lpa} LPA</span></td>
+              <td><strong>${d.min_cgpa}</strong></td>
+              <td><span style="font-size: 0.8rem;">${d.eligible_branches}</span></td>
+              <td>${dateStr}</td>
+              <td><span class="badge badge-info">${d.status}</span></td>
+              <td><span class="badge badge-accent">${d.total_applicants || 0} Apps</span></td>
+            </tr>
+          `;
+        });
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="8" style="color: var(--danger); text-align: center;">Failed to load drives: ${err.message}</td></tr>`;
+      }
+    }
+
+    // 4. Load Applicants for this Company
+    async function loadApplicants() {
+      const tbody = document.getElementById('hr-apps-tbody');
+      tbody.innerHTML = '<tr><td colspan="10" style="text-align: center;">Loading applicants...</td></tr>';
+      const statusFilter = document.getElementById('filter-hr-status').value;
+      try {
+        let url = `/api/placement/applications?company_id=${activeCompany.id}`;
+        if (statusFilter) url += `&status=${statusFilter}`;
+        const res = await fetch(url);
+        const json = await res.json();
+        tbody.innerHTML = '';
+        const apps = json.applications || [];
+
+        if (apps.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: var(--text-muted);">No candidate applications found for this company.</td></tr>';
+          return;
+        }
+
+        apps.forEach(a => {
+          let badgeClass = 'badge-info';
+          if (a.status === 'shortlisted') badgeClass = 'badge-accent';
+          if (a.status === 'in_progress') badgeClass = 'badge-warning';
+          if (a.status === 'selected') badgeClass = 'badge-success';
+          if (a.status === 'rejected') badgeClass = 'badge-danger';
+
+          const resumeLink = a.resume_url
+            ? `<a href="${a.resume_url}" target="_blank" style="color: var(--accent); font-weight: 600;">View Resume</a>`
+            : '<span style="color: var(--text-muted);">-</span>';
+
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>#APP-00${a.id}</strong></td>
+              <td><strong>${a.student_name}</strong></td>
+              <td><code>${a.usn}</code></td>
+              <td>${a.student_dept}</td>
+              <td><strong>${a.cgpa}</strong></td>
+              <td>${a.job_role}</td>
+              <td>${resumeLink}</td>
+              <td><span class="badge badge-neutral">${a.current_round_name || 'Stage 1'}</span></td>
+              <td><span class="badge ${badgeClass}">${a.status}</span></td>
+              <td>
+                <div style="display: flex; gap: 0.35rem;">
+                  <button type="button" class="btn btn-success" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="updateAppStatus(${a.id}, 'shortlisted')">Shortlist</button>
+                  <button type="button" class="btn btn-primary" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="updateAppStatus(${a.id}, 'selected')">Approve Offer</button>
+                  <button type="button" class="btn btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" onclick="updateAppStatus(${a.id}, 'rejected')">Reject</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="10" style="color: var(--danger); text-align: center;">Failed to load applicants: ${err.message}</td></tr>`;
+      }
+    }
+
+    async function updateAppStatus(appId, status) {
+      try {
+        const res = await fetch(`/api/placement/applications/${appId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status,
+            remarks: `Applicant ${status.toUpperCase()} by ${activeCompany.company_name} HR Desk`
+          })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+        alert(json.message);
+        loadApplicants();
+      } catch (err) {
+        alert('Action error: ' + err.message);
+      }
+    }
+
+    // Edit Company Info
+    function openEditCompanyModal() {
+      if (!activeCompany) return;
+      document.getElementById('edit-comp-name').value = activeCompany.company_name;
+      document.getElementById('edit-comp-industry').value = activeCompany.industry;
+      document.getElementById('edit-comp-website').value = activeCompany.website || '';
+      document.getElementById('edit-comp-person').value = activeCompany.contact_person;
+      document.getElementById('edit-comp-email').value = activeCompany.contact_email;
+      openModal('edit-comp-modal');
+    }
+
+    async function saveCompanyProfile(e) {
+      e.preventDefault();
+      if (!activeCompany) return;
+
+      const payload = {
+        company_name: document.getElementById('edit-comp-name').value.trim(),
+        industry: document.getElementById('edit-comp-industry').value.trim(),
+        website: document.getElementById('edit-comp-website').value.trim(),
+        contact_person: document.getElementById('edit-comp-person').value.trim(),
+        contact_email: document.getElementById('edit-comp-email').value.trim()
+      };
+
+      try {
+        const res = await fetch(`/api/placement/companies/${activeCompany.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+        alert(json.message);
+        closeModal('edit-comp-modal');
+
+        activeCompany = { ...activeCompany, ...payload };
+        loadHRData();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    // Post New Drive
+    function openCreateDriveModal() {
+      document.getElementById('new-drive-title').value = '';
+      document.getElementById('new-drive-role').value = '';
+      document.getElementById('new-drive-ctc').value = '22.00';
+      document.getElementById('new-drive-cgpa').value = '7.50';
+      document.getElementById('new-drive-branches').value = 'All';
+      document.getElementById('new-drive-date').value = '2026-11-30';
+      openModal('create-drive-modal');
+    }
+
+    async function saveNewDrive(e) {
+      e.preventDefault();
+      if (!activeCompany) return;
+
+      const payload = {
+        company_id: activeCompany.id,
+        title: document.getElementById('new-drive-title').value.trim(),
+        job_role: document.getElementById('new-drive-role').value.trim(),
+        ctc_lpa: parseFloat(document.getElementById('new-drive-ctc').value),
+        min_cgpa: parseFloat(document.getElementById('new-drive-cgpa').value),
+        eligible_branches: document.getElementById('new-drive-branches').value.trim(),
+        drive_date: document.getElementById('new-drive-date').value,
+        status: 'active'
+      };
+
+      try {
+        const res = await fetch('/api/placement/drives', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+        alert(json.message);
+        closeModal('create-drive-modal');
+        loadCompanyDrives();
+      } catch (err) {
+        alert('Drive creation error: ' + err.message);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initHRPortal);
+  </script>
+</body>
+</html>

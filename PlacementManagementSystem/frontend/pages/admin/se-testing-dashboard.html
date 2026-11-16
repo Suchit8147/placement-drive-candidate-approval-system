@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SE Impl 2: Automated Testing Dashboard | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">SE Engine</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html">Admin Dashboard</a>
+      <a href="se-traceability.html">Traceability</a>
+      <a href="se-testing-dashboard.html" class="active">Testing Dashboard</a>
+      <a href="dbms-transaction.html">DBMS Tx</a>
+      <a href="dbms-procedures.html">DBMS Procs</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <div class="badge badge-warning" style="margin-bottom: 0.35rem;">Engine 4 – Software Engineering • Implementation 2</div>
+        <h1 class="page-title">Automated Test Execution & Verification Dashboard</h1>
+        <p class="page-subtitle">Executes real backend unit and integration test assertions across all system modules without mock or randomized outputs.</p>
+      </div>
+      <div>
+        <button type="button" class="btn btn-primary" id="btn-run-tests" onclick="executeTestSuite()">
+          ⚡ Run All Automated Tests
+        </button>
+      </div>
+    </div>
+
+    <!-- Test Metrics Cards -->
+    <div class="grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;">
+      <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Total Test Cases</span>
+        <div id="stat-total" style="font-size: 2rem; font-weight: 800; color: var(--primary);">--</div>
+      </div>
+      <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center; border-left: 4px solid var(--success);">
+        <span style="font-size: 0.75rem; color: var(--success); font-weight: 700; text-transform: uppercase;">Tests Passed</span>
+        <div id="stat-passed" style="font-size: 2rem; font-weight: 800; color: var(--success);">--</div>
+      </div>
+      <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center; border-left: 4px solid var(--danger);">
+        <span style="font-size: 0.75rem; color: var(--danger); font-weight: 700; text-transform: uppercase;">Tests Failed</span>
+        <div id="stat-failed" style="font-size: 2rem; font-weight: 800; color: var(--danger);">--</div>
+      </div>
+      <div class="card" style="margin-bottom: 0; padding: 1.25rem; text-align: center;">
+        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Execution Duration</span>
+        <div id="stat-duration" style="font-size: 2rem; font-weight: 800; color: var(--accent);">--</div>
+      </div>
+    </div>
+
+    <!-- Test Results Table -->
+    <div class="card">
+      <div class="card-title">
+        <span>Concrete Test Execution Log (Live Run)</span>
+        <span id="test-timestamp" style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);"></span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table" style="font-size: 0.85rem;">
+          <thead>
+            <tr>
+              <th>Test ID</th>
+              <th>Module Under Test</th>
+              <th>Test Description</th>
+              <th>Input Data Tested</th>
+              <th>Expected Output</th>
+              <th>Actual Output</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="test-results-tbody">
+            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Executing automated test cases...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="info-callout" style="margin-top: 1.5rem;">
+        <strong>Academic Testing Verification:</strong>
+        Each test assertion executes real code paths in the backend engine (interval overlap check, Min-Heap room allocation, FCFS/Priority queue timers, and transaction rollbacks). No static or fake data is rendered.
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    async function executeTestSuite() {
+      const btn = document.getElementById('btn-run-tests');
+      btn.disabled = true;
+      btn.innerText = '⏳ Running Test Suite...';
+
+      try {
+        const res = await fetch('/api/se/run-tests', { method: 'POST' });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+
+        const suite = json.data;
+
+        document.getElementById('stat-total').innerText = suite.totalTestCases;
+        document.getElementById('stat-passed').innerText = suite.passedCount;
+        document.getElementById('stat-failed').innerText = suite.failedCount;
+        document.getElementById('stat-duration').innerText = `${suite.totalDurationMs} ms`;
+        document.getElementById('test-timestamp').innerText = `Executed at: ${new Date(suite.executedAt).toLocaleTimeString()}`;
+
+        const tbody = document.getElementById('test-results-tbody');
+        tbody.innerHTML = '';
+
+        suite.results.forEach(tc => {
+          const isPass = tc.status === 'PASS';
+          tbody.innerHTML += `
+            <tr style="background: ${isPass ? 'transparent' : '#fff1f2'};">
+              <td><strong>${tc.id}</strong></td>
+              <td><code>${tc.module}</code></td>
+              <td>${tc.name}</td>
+              <td><pre style="margin: 0; font-size: 0.75rem; max-width: 180px; overflow-x: auto;">${JSON.stringify(tc.input)}</pre></td>
+              <td>${tc.expected}</td>
+              <td style="color: ${isPass ? 'var(--text-main)' : 'var(--danger)'}; font-weight: ${isPass ? '400' : '700'};">${tc.actual}</td>
+              <td>
+                <span class="badge ${isPass ? 'badge-success' : 'badge-danger'}">
+                  ${tc.status} (${tc.executionMs || 1}ms)
+                </span>
+              </td>
+            </tr>
+          `;
+        });
+
+      } catch (err) {
+        alert('Test Execution Error: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '⚡ Run All Automated Tests';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', executeTestSuite);
+  </script>
+</body>
+</html>

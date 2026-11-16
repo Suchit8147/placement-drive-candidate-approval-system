@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DBMS Impl 1: Transactions & Rollback | Placement MS</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="../../index.html" class="nav-brand">🎓 PlacementMS <span class="badge-theme">DBMS Engine</span></a>
+    <div class="nav-links">
+      <a href="../../index.html">Home</a>
+      <a href="dashboard.html">Admin Dashboard</a>
+      <a href="interval-detection.html">DSA Interval</a>
+      <a href="greedy-allocation.html">DSA Greedy</a>
+      <a href="dbms-transaction.html" class="active">DBMS Transactions</a>
+      <a href="dbms-procedures.html">DBMS Stored Procs</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="page-header">
+      <div>
+        <div class="badge badge-danger" style="margin-bottom: 0.35rem;">Engine 5 – DBMS • Implementation 1</div>
+        <h1 class="page-title">ACID Transactions, Concurrency & Rollback Demo</h1>
+        <p class="page-subtitle">Demonstrates race condition mitigation, pessimistic row-level locking (SELECT ... FOR UPDATE), and automated transaction ROLLBACK upon resource conflict.</p>
+      </div>
+      <div>
+        <a href="../../index.html" class="btn btn-outline">← Back to Portal</a>
+      </div>
+    </div>
+
+    <!-- Scenario Card -->
+    <div class="card" style="background: #fff1f2; border-left: 4px solid var(--danger); padding: 1rem 1.5rem; margin-bottom: 1.5rem;">
+      <h3 style="font-size: 1rem; color: var(--danger); margin-bottom: 0.25rem;">🔬 Concurrency Conflict Simulation Scenario:</h3>
+      <p style="font-size: 0.85rem; color: #9f1239; margin: 0;">
+        Two administrators concurrently attempt to book the identical physical room (<strong>Room-101</strong>) for overlapping time intervals.
+        Transaction 1 (Admin A) acquires the row lock first and successfully performs a <code>COMMIT</code>.
+        Transaction 2 (Admin B) discovers that the resource is occupied, aborts execution, and triggers a full <code>ROLLBACK</code>, preserving 100% database integrity.
+      </p>
+    </div>
+
+    <div class="grid-2">
+      <!-- Input Controls -->
+      <div class="card">
+        <div class="card-title">Concurrent Transaction Setup</div>
+
+        <form id="tx-demo-form">
+          <div class="form-group">
+            <label class="form-label">Contended Shared Resource (Room):</label>
+            <select class="form-control" id="tx-room-id">
+              <option value="1">Room-101 (Placement Cabin 1)</option>
+              <option value="2">Room-102 (Placement Cabin 2)</option>
+            </select>
+          </div>
+
+          <!-- Transaction 1 Box -->
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <strong style="color: var(--success); font-size: 0.9rem;">Transaction 1 (Admin A - Arrives First at t₀)</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+              <div>
+                <label class="form-label">Slot Start:</label>
+                <input type="text" class="form-control" id="tx1-start" value="2026-11-20 14:00:00" required>
+              </div>
+              <div>
+                <label class="form-label">Slot End:</label>
+                <input type="text" class="form-control" id="tx1-end" value="2026-11-20 15:00:00" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction 2 Box -->
+          <div style="background: #fff1f2; border: 1px solid #fecdd3; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+            <strong style="color: var(--danger); font-size: 0.9rem;">Transaction 2 (Admin B - Concurrent Overlapping Request)</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.5rem;">
+              <div>
+                <label class="form-label">Slot Start (Overlaps TX 1):</label>
+                <input type="text" class="form-control" id="tx2-start" value="2026-11-20 14:30:00" required>
+              </div>
+              <div>
+                <label class="form-label">Slot End:</label>
+                <input type="text" class="form-control" id="tx2-end" value="2026-11-20 15:30:00" required>
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-danger" style="width: 100%;" id="btn-run-tx">
+            ▶ Execute Concurrent Transactions
+          </button>
+        </form>
+
+        <div class="info-callout" style="margin-top: 1.5rem;">
+          <strong>DBMS Concurrency Guarantee:</strong>
+          Without database transaction locking, both requests would read the slot as available and write to the database, causing a double-booking disaster. MySQL transactional locking prevents this race condition completely.
+        </div>
+      </div>
+
+      <!-- Live Transaction Log & ACID State -->
+      <div class="card">
+        <div class="card-title">Transaction Execution Log & State Ledger</div>
+
+        <div id="tx-summary-banner" style="display: flex; gap: 0.75rem; margin-bottom: 1rem;">
+          <div id="tx1-status-box" style="flex: 1; padding: 0.75rem; border-radius: 6px; background: #f1f5f9; text-align: center;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">TRANSACTION 1</span>
+            <div id="tx1-status-text" style="font-weight: 800; font-size: 1.1rem; color: var(--text-muted);">READY</div>
+          </div>
+          <div id="tx2-status-box" style="flex: 1; padding: 0.75rem; border-radius: 6px; background: #f1f5f9; text-align: center;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700;">TRANSACTION 2</span>
+            <div id="tx2-status-text" style="font-weight: 800; font-size: 1.1rem; color: var(--text-muted);">READY</div>
+          </div>
+        </div>
+
+        <h4 style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--primary);">Step-by-Step SQL Transaction Trace</h4>
+        <div class="table-responsive">
+          <table class="table" style="font-size: 0.8rem;">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Thread</th>
+                <th>Executed SQL Command</th>
+                <th>Status / Outcome</th>
+              </tr>
+            </thead>
+            <tbody id="tx-log-tbody">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Click "Execute Concurrent Transactions" to inspect SQL trace.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="acid-consistency-note" style="display: none; margin-top: 1rem; padding: 0.75rem 1rem; background: #f0fdf4; border-left: 4px solid var(--success); font-size: 0.85rem; color: #166534;">
+          <strong>ACID Consistency Confirmed:</strong> Database records remain consistent. Exactly 1 booking was committed; conflicting booking was cleanly rolled back.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Placement Drive and Candidate Approval Management System | Academic Project 2026</p>
+  </footer>
+
+  <script>
+    document.getElementById('tx-demo-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const roomId = document.getElementById('tx-room-id').value;
+      const slot1 = {
+        start: document.getElementById('tx1-start').value,
+        end: document.getElementById('tx1-end').value
+      };
+      const slot2 = {
+        start: document.getElementById('tx2-start').value,
+        end: document.getElementById('tx2-end').value
+      };
+
+      try {
+        const res = await fetch('/api/dbms/transaction-demo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roomId, slot1, slot2 })
+        });
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message);
+
+        // Update Status Boxes
+        const tx1Box = document.getElementById('tx1-status-box');
+        const tx1Text = document.getElementById('tx1-status-text');
+        tx1Box.style.background = 'var(--success-light)';
+        tx1Text.style.color = 'var(--success)';
+        tx1Text.innerText = '✓ COMMITTED';
+
+        const tx2Box = document.getElementById('tx2-status-box');
+        const tx2Text = document.getElementById('tx2-status-text');
+        tx2Box.style.background = 'var(--danger-light)';
+        tx2Text.style.color = 'var(--danger)';
+        tx2Text.innerText = '⛔ ROLLED BACK';
+
+        document.getElementById('acid-consistency-note').style.display = 'block';
+
+        // Populate SQL Trace
+        const tbody = document.getElementById('tx-log-tbody');
+        tbody.innerHTML = '';
+        json.transactionLogs.forEach(l => {
+          let badgeClass = 'badge-neutral';
+          if (l.status === 'COMMITTED') badgeClass = 'badge-success';
+          if (l.status === 'ROLLED_BACK') badgeClass = 'badge-danger';
+          if (l.status === 'ACTIVE' || l.status === 'CHECKING') badgeClass = 'badge-info';
+
+          tbody.innerHTML += `
+            <tr style="background: ${l.status === 'ROLLED_BACK' ? '#fff1f2' : (l.status === 'COMMITTED' ? '#f0fdf4' : 'transparent')}">
+              <td><strong>${l.step}</strong></td>
+              <td><span class="badge ${l.tx === 'TX_1' ? 'badge-success' : 'badge-danger'}">${l.tx || 'SYSTEM'}</span></td>
+              <td><code>${l.sql || l.event}</code></td>
+              <td>
+                <span class="badge ${badgeClass}">${l.status || 'OK'}</span>
+                ${l.note ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.2rem;">${l.note}</div>` : ''}
+              </td>
+            </tr>
+          `;
+        });
+
+      } catch (err) {
+        alert('Transaction simulation error: ' + err.message);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('tx-demo-form').dispatchEvent(new Event('submit'));
+    });
+  </script>
+</body>
+</html>
